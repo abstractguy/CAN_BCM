@@ -13,7 +13,15 @@
 INTERFACE_TYPE=vcan DELAY=1 DELAY_US=500000 DELAY_SEC=0
 
 # Import libraries.
-source libraries.sh
+source library.sh
+
+# Create character device for TCP/IP socket manipulation if it doesn't exist already.
+if [ ! -e /dev/tcp ]; then
+    mknod /dev/tcp c 30 36
+fi
+
+# Flush firewall rules to enable multiple binding of listeners to same socket.
+iptables -F
 
 # Setup interface if it doesn't exist.
 if [ ! -e "/sys/class/net/"$INTERFACE ]; then
@@ -26,14 +34,6 @@ ifconfig $INTERFACE up
 # Starting CAN broadcast manager.
 bcmserver &
 PID_SERVER=$!
-
-# Create character device for TCP/IP socket manipulation if it doesn't exist already.
-if [ ! -e /dev/tcp ]; then
-    mknod /dev/tcp c 30 36
-fi
-
-# Flush firewall rules to enable multiple binding of listeners to same socket.
-iptables -F
 
 # Waiting for server to boot.
 sleep 1
@@ -56,8 +56,9 @@ echo "<${INTERFACE} A ${DELAY_SEC} ${DELAY_US} 010 1 01>" >&3
 # < INTERFACE RECEIVE_FROM DELAY_SEC DELAY_US HEX_ADDRESS N_BYTES FILTER >
 echo "<${INTERFACE} R 0 0 010 1 FF>" >&3
 
+LEDS_ON
+
 while true :; do
-    echo $SYNC
     # Test with 10 second timeout.
     read -t 10 SYNC
     if [[ "$?" > 128 ]]; then
@@ -74,4 +75,5 @@ while true :; do
     fi
 done
 
+LEDS_OFF
 safe_exit
