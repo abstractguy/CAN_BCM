@@ -34,11 +34,11 @@ fi
 
 # Setup interface if it doesn't exist.
 if [ ! -e /sys/class/net/$INTERFACE ]; then
-    ip link add name $INTERFACE type $INTERFACE_TYPE
+    ip link add dev $INTERFACE type $INTERFACE_TYPE
 fi
 
 # Making sure the interface is up.
-ifconfig $INTERFACE up
+ip link set up $INTERFACE
 
 # Starting CAN broadcast manager.
 bcmserver &
@@ -54,16 +54,19 @@ PID_INPUT=$!
 
 function destroy {
     # Be nice and kill all nodes.
+    echo "<${INTERFACE} U 0 0 010 1 00>" >&3 # Send power off command.
+    echo "<${INTERFACE} X 0 0 030 0 00>" >&3 # Delete receiver.
+    echo "<${INTERFACE} X 0 0 020 0 00>" >&3 # Delete receiver.
     echo "<${INTERFACE} X 0 0 010 0 00>" >&3 # Delete receiver.
     echo "<${INTERFACE} D 0 0 010 0 00>" >&3 # Delete cyclic sender.
-    echo "<${INTERFACE} S 0 0 010 1 00>" >&3 # Send power off command.
     sleep 1
 
     # Kill server.
     kill $PID_SERVER
 
     # Destroy network interface.
-    ifconfig $INTERFACE down
+    #ifconfig $INTERFACE down
+    ip link set down $INTERFACE
     ip link delete dev $INTERFACE type $INTERFACE_TYPE
 
     # Turn green LED off and red LED on.
@@ -84,6 +87,8 @@ echo "<${INTERFACE} A 0 ${DELAY_US} 010 1 01>" >&3
 
 # < INTERFACE RECEIVE_FROM DELAY_SEC DELAY_US HEX_ADDRESS N_BYTES FILTER >
 echo "<${INTERFACE} R 0 0 010 1 FF>" >&3
+echo "<${INTERFACE} R 0 0 020 1 FF>" >&3
+echo "<${INTERFACE} R 0 0 030 1 FF>" >&3
 
 # Main loop.
 while true :; do
