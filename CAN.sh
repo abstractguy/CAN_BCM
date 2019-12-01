@@ -8,10 +8,12 @@
 
 # Modifiable variables.
 INTERFACE_TYPE=vcan
+BITRATE=50000
 DELAY_US=500000
 
 # Non-modifiable variables.
 INTERFACE=$INTERFACE_TYPE'0'
+BITRATE='bitrate '$BITRATE
 SOCKET=/dev/tcp/127.0.0.1/28600
 GREEN_LED=/sys/class/leds/green
 RED_LED=/sys/class/leds/red
@@ -32,9 +34,14 @@ if [ ! -e /dev/tcp ]; then
     iptables -F
 fi
 
+# Virtual CAN interface has no bitrate.
+if [ "$INTERFACE_TYPE" == 'vcan' ]; then
+    BITRATE=
+fi
+
 # Setup interface if it doesn't exist.
 if [ ! -e /sys/class/net/$INTERFACE ]; then
-    ip link add dev $INTERFACE type $INTERFACE_TYPE
+    ip link add dev $INTERFACE type $INTERFACE_TYPE $BITRATE
 fi
 
 # Making sure the interface is up.
@@ -48,10 +55,6 @@ sleep 1 # Waiting for server to boot.
 # Linking socket to file descriptor to be used.
 exec 3<>$SOCKET
 
-# Redirecting file descriptor input to stdout.
-cat <&3 &
-PID_INPUT=$!
-
 function destroy {
     # Be nice and kill all nodes.
     echo "<${INTERFACE} U 0 0 010 1 00>" >&3 # Send power off command.
@@ -61,11 +64,13 @@ function destroy {
     echo "<${INTERFACE} D 0 0 010 0 00>" >&3 # Delete cyclic sender.
     sleep 1
 
+    # Kill file descriptor.
+    exec 3>&-
+
     # Kill server.
     kill $PID_SERVER
 
     # Destroy network interface.
-    #ifconfig $INTERFACE down
     ip link set down $INTERFACE
     ip link delete dev $INTERFACE type $INTERFACE_TYPE
 
@@ -92,8 +97,13 @@ echo "<${INTERFACE} R 0 0 030 1 FF>" >&3
 
 # Main loop.
 while true :; do
-    # Test with 10 second timeout.
+    # Read server output from file descriptor.
+    read -t 0.001 -d '' -u 3 CAN_INPUT
+    echo $CAN_INPUT
+
+    # Read from standard input with 10 second timeout.
     read -t 10 SYNC
+
     if [[ "$?" > 128 ]]; then
         echo "SYNC timeout!"
         break
