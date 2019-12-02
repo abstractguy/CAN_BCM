@@ -1,10 +1,11 @@
+#!/bin/bash
 # Program:       CAN.sh
 # Creator:       Samuel Duclos
 # Comments:      This file is directly invoked using source.
 #                This prevents file descriptors from getting
 #                closed prematurely with an exiting subshell.
 # Documentation: https://github.com/linux-can/can-utils/blob/master/bcmserver.c
-# Example usage: source /home/debian/CAN.sh
+# Example usage: sudo --prompt=temppwd su -c 'source /home/debian/CAN.sh' --preserve-environment
 
 # Modifiable variables.
 INTERFACE_TYPE=vcan
@@ -26,7 +27,8 @@ echo 'none' > $RED_LED/trigger
 echo '255' > $GREEN_LED/brightness
 echo '0' > $RED_LED/brightness
 
-if [ ! -e /dev/tcp ]; then
+if [ ! -e /dev/tcp ]
+then
     # Create character device for TCP/IP socket manipulation if it doesn't exist already.
     mknod /dev/tcp c 30 36
 
@@ -35,13 +37,15 @@ if [ ! -e /dev/tcp ]; then
 fi
 
 # Virtual CAN interface has no bitrate.
-if [ "$INTERFACE_TYPE" == 'vcan' ]; then
+if [ "$INTERFACE_TYPE" == 'vcan' ]
+then
     BITRATE=
 fi
 
 # Setup interface if it doesn't exist.
-if [ ! -e /sys/class/net/$INTERFACE ]; then
-    ip link add dev $INTERFACE type $INTERFACE_TYPE $BITRATE
+if [ ! -e /sys/class/net/$INTERFACE ]
+then
+    eval "ip link add dev $INTERFACE type $INTERFACE_TYPE $BITRATE"
 fi
 
 # Making sure the interface is up.
@@ -53,19 +57,21 @@ PID_SERVER=$!
 sleep 1 # Waiting for server to boot.
 
 # Linking socket to file descriptor to be used.
-exec 3<>$SOCKET
+exec {FILE_DESCRIPTOR}<>$SOCKET
 
 function destroy {
     # Be nice and kill all nodes.
-    echo "<${INTERFACE} U 0 0 010 1 00>" >&3 # Send power off command.
-    echo "<${INTERFACE} X 0 0 030 0 00>" >&3 # Delete receiver.
-    echo "<${INTERFACE} X 0 0 020 0 00>" >&3 # Delete receiver.
-    echo "<${INTERFACE} X 0 0 010 0 00>" >&3 # Delete receiver.
-    echo "<${INTERFACE} D 0 0 010 0 00>" >&3 # Delete cyclic sender.
+    echo "<${INTERFACE} U 0 0 010 1 00>" >&$FILE_DESCRIPTOR # Send power off command.
+    echo "<${INTERFACE} X 0 0 030 0 00>" >&$FILE_DESCRIPTOR # Delete receiver.
+    echo "<${INTERFACE} X 0 0 020 0 00>" >&$FILE_DESCRIPTOR # Delete receiver.
+    echo "<${INTERFACE} X 0 0 010 0 00>" >&$FILE_DESCRIPTOR # Delete receiver.
+    sleep 1
+
+    echo "<${INTERFACE} D 0 0 010 0 00>" >&$FILE_DESCRIPTOR # Delete cyclic sender.
     sleep 1
 
     # Kill file descriptor.
-    exec 3>&-
+    exec {FILE_DESCRIPTOR}>&-
 
     # Kill server.
     kill $PID_SERVER
@@ -88,28 +94,36 @@ trap destroy SIGHUP
 # Send commands to server through file descriptor to socket:
 
 # < INTERFACE ADD_CYCLE DELAY_SEC DELAY_US HEX_ADDRESS N_BYTES SPACE_SEPARATED_HEX_BYTES >
-echo "<${INTERFACE} A 0 ${DELAY_US} 010 1 01>" >&3
+echo "<${INTERFACE} A 0 ${DELAY_US} 010 1 01>" >&$FILE_DESCRIPTOR
 
 # < INTERFACE RECEIVE_FROM DELAY_SEC DELAY_US HEX_ADDRESS N_BYTES FILTER >
-echo "<${INTERFACE} R 0 0 010 1 FF>" >&3
-echo "<${INTERFACE} R 0 0 020 1 FF>" >&3
-echo "<${INTERFACE} R 0 0 030 1 FF>" >&3
+echo "<${INTERFACE} R 0 0 010 1 FF>" >&$FILE_DESCRIPTOR
+echo "<${INTERFACE} R 0 0 020 1 FF>" >&$FILE_DESCRIPTOR
+echo "<${INTERFACE} R 0 0 030 1 FF>" >&$FILE_DESCRIPTOR
 
 # Main loop.
-while true :; do
+while true :
+do
     # Read server output from file descriptor.
-    read -t 0.001 -d '' -u 3 CAN_INPUT
-    echo $CAN_INPUT
+    read -t 0.001 -d '' -u $FILE_DESCRIPTOR -r CAN_INPUT
 
-    # Read from standard input with 10 second timeout.
-    read -t 10 SYNC
+    if [ "$CAN_INPUT" != '' ]
+    then
+      echo "$CAN_INPUT"
+    fi
 
-    if [[ "$?" > 128 ]]; then
+    # Read from standard input with 8 second timeout.
+    read -t 8 -r SYNC
+
+    if [[ $? -gt 128 ]]
+    then
         echo "SYNC timeout!"
         break
-    elif [ "$SYNC" == 'ON' ]; then
+    elif [ "$SYNC" == 'ON' ]
+    then
         continue
-    elif [ "$SYNC" == 'OFF' ]; then
+    elif [ "$SYNC" == 'OFF' ]
+    then
         echo 'Power down command received!'
         break
     else
