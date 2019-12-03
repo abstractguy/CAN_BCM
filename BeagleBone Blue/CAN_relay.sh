@@ -8,7 +8,7 @@
 # Example usage: sudo --prompt=temppwd su -c 'source /home/debian/CAN_relay.sh' --preserve-environment
 
 # Modifiable variables.
-INTERFACE_TYPE=can
+INTERFACE_TYPE=vcan
 BITRATE=50000
 DELAY_US=500000
 
@@ -62,19 +62,21 @@ exec {FILE_DESCRIPTOR}<>$SOCKET
 function destroy {
     # Be nice and kill all nodes.
     echo "<${INTERFACE} U 0 0 010 1 00>" >&$FILE_DESCRIPTOR # Send power off command.
-    echo "<${INTERFACE} X 0 0 030 0 00>" >&$FILE_DESCRIPTOR # Delete receiver.
-    echo "<${INTERFACE} X 0 0 020 0 00>" >&$FILE_DESCRIPTOR # Delete receiver.
-    echo "<${INTERFACE} X 0 0 010 0 00>" >&$FILE_DESCRIPTOR # Delete receiver.
     sleep 1
 
+    echo "<${INTERFACE} X 0 0 030 0 00>" >&$FILE_DESCRIPTOR # Delete receiver.
+    echo "<${INTERFACE} X 0 0 010 0 00>" >&$FILE_DESCRIPTOR # Delete receiver.
+    echo "<${INTERFACE} X 0 0 020 0 00>" >&$FILE_DESCRIPTOR # Delete receiver.
     echo "<${INTERFACE} D 0 0 010 0 00>" >&$FILE_DESCRIPTOR # Delete cyclic sender.
     sleep 1
+
+    # Kill server.
+    kill $PID_SERVER
 
     # Kill file descriptor.
     exec {FILE_DESCRIPTOR}>&-
 
-    # Kill server.
-    kill $PID_SERVER
+    echo "After exit."
 
     # Destroy network interface.
     ip link set down $INTERFACE
@@ -86,7 +88,6 @@ function destroy {
 }
 
 # Let kernel trap shell exit interruptions.
-trap destroy EXIT
 trap destroy SIGTERM
 trap destroy SIGINT
 trap destroy SIGHUP
@@ -95,11 +96,13 @@ trap destroy SIGHUP
 
 # < INTERFACE ADD_CYCLE DELAY_SEC DELAY_US HEX_ADDRESS N_BYTES SPACE_SEPARATED_HEX_BYTES >
 echo "<${INTERFACE} A 0 ${DELAY_US} 010 1 01>" >&$FILE_DESCRIPTOR
+sleep 1
 
 # < INTERFACE RECEIVE_FROM DELAY_SEC DELAY_US HEX_ADDRESS N_BYTES FILTER >
 echo "<${INTERFACE} R 0 0 010 1 FF>" >&$FILE_DESCRIPTOR
 echo "<${INTERFACE} R 0 0 020 1 FF>" >&$FILE_DESCRIPTOR
 echo "<${INTERFACE} R 0 0 030 1 FF>" >&$FILE_DESCRIPTOR
+sleep 1
 
 # Main loop.
 while true :
