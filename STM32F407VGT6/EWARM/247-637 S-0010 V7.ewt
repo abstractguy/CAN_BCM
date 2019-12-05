@@ -1175,12 +1175,6 @@
         <name>$PROJ_DIR$\..\Src\interfaceB1.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\Src\interfaceS0008.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\Src\interfaceS0008.h</name>
-      </file>
-      <file>
         <name>$PROJ_DIR$\..\Src\interfaceT1.c</name>
       </file>
       <file>
@@ -1250,12 +1244,6 @@
         <name>$PROJ_DIR$\..\Src\piloteTimer6Up.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\Src\piloteUSART2.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\Src\piloteUSART2.h</name>
-      </file>
-      <file>
         <name>$PROJ_DIR$\..\Src\processusBoutonConnecte.c</name>
       </file>
       <file>
@@ -1272,12 +1260,6 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\Src\serviceBaseDeTemps.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\Src\serviceProtocole637.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\Src\serviceProtocole637.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\Src\stm32f4xx_hal_msp.c</name>

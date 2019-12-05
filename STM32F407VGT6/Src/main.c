@@ -38,20 +38,17 @@
 
 #include "piloteTimer6Up.h"
 #include "piloteCAN1.h"
-#include "piloteUSART2.h"
 #include "piloteIOB1.h"
 #include "piloteIOT1.h"
 #include "piloteIOT2.h"
 #include "piloteIOT3.h"
 #include "piloteIOT4.h"
 #include "serviceBaseDeTemps.h"
-#include "serviceProtocole637.h"
 #include "interfaceB1.h"
 #include "interfaceT1.h"
 #include "interfaceT2.h"
 #include "interfaceT3.h"
 #include "interfaceT4.h"
-#include "interfaceS0008.h"
 #include "processusClignotant.h"
 #include "processusBoutonConnecte.h"
     
@@ -87,7 +84,6 @@ UART_HandleTypeDef huart2;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_USART2_UART_Init(void);
 static void MX_TIM6_Init(void);
 static void MX_CAN1_Init(void);
 /* USER CODE BEGIN PFP */
@@ -101,21 +97,18 @@ void main_initialiseApresLeHAL(void);
 void main_initialiseAvantLeHAL(void)
 {
   piloteTimer6Up_initialise();
-  //piloteCAN1_initialise(); //irait ici en temps normal... mais il y a un bug dans le cube  
-  piloteUSART2_initialise();
+  //piloteCAN1_initialise(); //irait ici en temps normal... mais il y a un bug dans le cube
   piloteIOB1_initialise();
   piloteIOT1_initialise();
   piloteIOT2_initialise();
   piloteIOT3_initialise();
   piloteIOT4_initialise();
   serviceBaseDeTemps_initialise();
-  serviceProtocole637_initialise();
   interfaceB1_initialise();
   interfaceT1_initialise();
   interfaceT2_initialise();
   interfaceT3_initialise();
   interfaceT4_initialise();
-  interfaceS0008_initialise();
   processusClignotant_initialise();
   processusBoutonConnecte_initialise();
 }
@@ -160,7 +153,6 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_USART2_UART_Init();
   MX_TIM6_Init();
   MX_CAN1_Init();
   /* USER CODE BEGIN 2 */
@@ -295,39 +287,6 @@ static void MX_TIM6_Init(void)
   /* USER CODE BEGIN TIM6_Init 2 */
 
   /* USER CODE END TIM6_Init 2 */
-
-}
-
-/**
-  * @brief USART2 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_USART2_UART_Init(void)
-{
-
-  /* USER CODE BEGIN USART2_Init 0 */
-
-  /* USER CODE END USART2_Init 0 */
-
-  /* USER CODE BEGIN USART2_Init 1 */
-
-  /* USER CODE END USART2_Init 1 */
-  huart2.Instance = USART2;
-  huart2.Init.BaudRate = 19200;
-  huart2.Init.WordLength = UART_WORDLENGTH_8B;
-  huart2.Init.StopBits = UART_STOPBITS_1;
-  huart2.Init.Parity = UART_PARITY_NONE;
-  huart2.Init.Mode = UART_MODE_TX_RX;
-  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
-  if (HAL_UART_Init(&huart2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN USART2_Init 2 */
-
-  /* USER CODE END USART2_Init 2 */
 
 }
 

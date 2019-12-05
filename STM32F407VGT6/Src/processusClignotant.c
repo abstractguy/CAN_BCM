@@ -44,7 +44,7 @@ void processusClignotant_eteintUnPeu(void)
     return;
   }
   processusClignotant_compteur = 0;
-  interfaceT1_allume();
+  //interfaceT1_allume();
   serviceBaseDeTemps_execute[PROCESSUSCLIGNOTANT_PHASE] =
       processusClignotant_allumeUnPeu;
   
@@ -65,9 +65,14 @@ void processusClignotant_allumeUnPeu(void)
   
   piloteCAN1_litUnMessageRecu(processusClignotant_donneesRecues); 
   
-  
   processusClignotant_compteur = 0;
-  interfaceT1_eteint();
+
+  if (processusClignotant_donneesRecues[0] == 0x00) {
+      interfaceT1_eteint();
+  } else if (processusClignotant_donneesRecues[0] == 0x01) {
+      interfaceT1_allume();
+  }
+
   serviceBaseDeTemps_execute[PROCESSUSCLIGNOTANT_PHASE] =
       processusClignotant_eteintLongtemps;  
 }
