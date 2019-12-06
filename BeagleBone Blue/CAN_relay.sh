@@ -31,6 +31,9 @@ echo 'none' > $RED_LED/trigger
 echo '255' > $GREEN_LED/brightness
 echo '0' > $RED_LED/brightness
 
+# Configure user button 2 (PAUSE_BTN, GPIO2_5).
+echo 69 > $GPIO/export
+
 if [ ! -e /dev/tcp ]
 then
     # Create character device for TCP/IP socket manipulation if it doesn't exist already.
@@ -71,7 +74,7 @@ function destroy {
     echo "<${INTERFACE} X 0 0 003 0 00>" >&$FILE_DESCRIPTOR # Delete receiver.
     echo "<${INTERFACE} X 0 0 001 0 00>" >&$FILE_DESCRIPTOR # Delete receiver.
     echo "<${INTERFACE} X 0 0 002 0 00>" >&$FILE_DESCRIPTOR # Delete receiver.
-    echo "<${INTERFACE} D 0 0 001 0 00>" >&$FILE_DESCRIPTOR # Delete cyclic sender.
+    echo "<${INTERFACE} D 0 0 001 0 00>" >&$FILE_DESCRIPTOR # Delete receiver.
     sleep 1
 
     # Kill server.
