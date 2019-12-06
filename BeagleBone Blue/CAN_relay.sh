@@ -1,3 +1,4 @@
+#!/bin/bash
 # Program:       CAN_relay.sh
 # Creator:       Samuel Duclos
 # Comments:      This file is directly invoked using source.
@@ -9,7 +10,7 @@
 # Modifiable variables.
 INTERFACE_TYPE=vcan
 BITRATE=50000
-DELAY_US=5000
+DELAY_US=500000
 
 # Non-modifiable variables.
 INTERFACE=$INTERFACE_TYPE'0'
@@ -17,6 +18,10 @@ BITRATE='bitrate '$BITRATE
 SOCKET=/dev/tcp/127.0.0.1/28600
 GREEN_LED=/sys/class/leds/green
 RED_LED=/sys/class/leds/red
+GPIO=/sys/class/gpio
+BUTTON=$GPIO'/gpio69/value'
+BUTTON_STATE=1
+MOTOR_STATE=0x00
 
 # Set green LED to persistent mode.
 echo 'none' > $GREEN_LED/trigger
@@ -44,40 +49,43 @@ fi
 # Setup interface if it doesn't exist.
 if [ ! -e /sys/class/net/$INTERFACE ]
 then
-    ip link add dev $INTERFACE type $INTERFACE_TYPE $BITRATE
+    ip link add dev $INTERFACE type $INTERFACE_TYPE
 fi
 
 # Making sure the interface is up.
-ip link set up $INTERFACE
+eval "ip link set up $INTERFACE type $INTERFACE_TYPE $BITRATE"
 
-# Start CAN broadcast manager and wait for it to boot.
+# Starting CAN broadcast manager.
 bcmserver &
 PID_SERVER=$!
-sleep 1
+sleep 1 # Waiting for server to boot.
 
 # Linking socket to file descriptor to be used.
 exec {FILE_DESCRIPTOR}<>$SOCKET
 
 function destroy {
-    # Be nice and kill all nodes then wait.
+    # Be nice and kill all nodes.
     echo "<${INTERFACE} U 0 0 001 1 00>" >&$FILE_DESCRIPTOR # Send power off command.
-    echo "<${INTERFACE} X 0 0 003 0 00>" >&$FILE_DESCRIPTOR # Delete receiver.
-    echo "<${INTERFACE} X 0 0 002 0 00>" >&$FILE_DESCRIPTOR # Delete receiver.
-    echo "<${INTERFACE} X 0 0 001 0 00>" >&$FILE_DESCRIPTOR # Delete receiver.
     sleep 1
 
-    # Kill cyclic sender after all nodes received message.
+    echo "<${INTERFACE} X 0 0 003 0 00>" >&$FILE_DESCRIPTOR # Delete receiver.
+    echo "<${INTERFACE} X 0 0 001 0 00>" >&$FILE_DESCRIPTOR # Delete receiver.
+    echo "<${INTERFACE} X 0 0 002 0 00>" >&$FILE_DESCRIPTOR # Delete receiver.
     echo "<${INTERFACE} D 0 0 001 0 00>" >&$FILE_DESCRIPTOR # Delete cyclic sender.
-
-    # Kill file descriptor.
-    exec $FILE_DESCRIPTOR>&-
+    sleep 1
 
     # Kill server.
     kill $PID_SERVER
 
+    # Kill file descriptor.
+    exec {FILE_DESCRIPTOR}>&-
+
     # Destroy network interface.
     ip link set down $INTERFACE
     ip link delete dev $INTERFACE type $INTERFACE_TYPE
+
+    # Configure user button 2 (PAUSE_BTN, GPIO2_5).
+    echo 69 > $GPIO/unexport
 
     # Turn green LED off and red LED on.
     echo '0' > $GREEN_LED/brightness
@@ -85,7 +93,6 @@ function destroy {
 }
 
 # Let kernel trap shell exit interruptions.
-trap destroy EXIT
 trap destroy SIGTERM
 trap destroy SIGINT
 trap destroy SIGHUP
@@ -94,45 +101,47 @@ trap destroy SIGHUP
 
 # < INTERFACE ADD_CYCLE DELAY_SEC DELAY_US HEX_ADDRESS N_BYTES SPACE_SEPARATED_HEX_BYTES >
 echo "<${INTERFACE} A 0 ${DELAY_US} 001 1 01>" >&$FILE_DESCRIPTOR
+sleep 1
 
 # < INTERFACE RECEIVE_FROM DELAY_SEC DELAY_US HEX_ADDRESS N_BYTES FILTER >
 echo "<${INTERFACE} R 0 0 001 1 FF>" >&$FILE_DESCRIPTOR
 echo "<${INTERFACE} R 0 0 002 1 FF>" >&$FILE_DESCRIPTOR
 echo "<${INTERFACE} R 0 0 003 1 FF>" >&$FILE_DESCRIPTOR
+sleep 1
 
-# Main loop.
-#while true :
-#do
-#    # Read server output from file descriptor.
-#    read -t 0.001 -d '' -u $FILE_DESCRIPTOR CAN_INPUT
-#    echo $CAN_INPUT
-#
-#    # Read from standard input with 5 second timeout.
-#    read -t 5 SYNC
-#
-#    if [[ "$?" > 128 ]]
-#    then
-#        echo "SYNC timeout!"
-#        break
-#    elif [ "$SYNC" == 'ON' ]
-#    then
-#        continue
-#    elif [ "$SYNC" == 'OFF' ]
-#    then
-#        echo 'Power down command received!'
-#        break
-#    else
-#        echo 'Ill command received from computer.'
-#        break
-#    fi
-#done
+function time_precise {
+    $(($(date +%s) * 1000000000 + $(date +%N)))
+}
 
 # Main loop.
 while true :
 do
     # Read server output from file descriptor.
-    read -t 0.001 -d '' -u $FILE_DESCRIPTOR CAN_INPUT
-    echo $CAN_INPUT
+    read -t 0.001 -d '' -u $FILE_DESCRIPTOR -r CAN_INPUT
+
+    if [ "$CAN_INPUT" != '' ]
+    then
+      echo "$CAN_INPUT"
+    fi
+
+    # Read from standard input with 8 second timeout.
+    read -t 8 -r SYNC
+
+    if [[ $? -gt 128 ]]
+    then
+        echo "SYNC timeout!"
+        break
+    elif [ "$SYNC" == 'ON' ]
+    then
+        continue
+    elif [ "$SYNC" == 'OFF' ]
+    then
+        echo 'Power down command received!'
+        break
+    else
+        echo 'Ill command received from computer.'
+        break
+    fi
 done
 
 destroy
