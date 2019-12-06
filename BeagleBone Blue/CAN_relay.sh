@@ -1,4 +1,3 @@
-#!/bin/bash
 # Program:       CAN_relay.sh
 # Creator:       Samuel Duclos
 # Comments:      This file is directly invoked using source.
@@ -10,7 +9,7 @@
 # Modifiable variables.
 INTERFACE_TYPE=vcan
 BITRATE=50000
-DELAY_US=500000
+DELAY_US=5000
 
 # Non-modifiable variables.
 INTERFACE=$INTERFACE_TYPE'0'
@@ -45,38 +44,36 @@ fi
 # Setup interface if it doesn't exist.
 if [ ! -e /sys/class/net/$INTERFACE ]
 then
-    ip link add dev $INTERFACE type $INTERFACE_TYPE
+    ip link add dev $INTERFACE type $INTERFACE_TYPE $BITRATE
 fi
 
 # Making sure the interface is up.
-eval "ip link set up $INTERFACE type $INTERFACE_TYPE $BITRATE"
+ip link set up $INTERFACE
 
-# Starting CAN broadcast manager.
+# Start CAN broadcast manager and wait for it to boot.
 bcmserver &
 PID_SERVER=$!
-sleep 1 # Waiting for server to boot.
+sleep 1
 
 # Linking socket to file descriptor to be used.
 exec {FILE_DESCRIPTOR}<>$SOCKET
 
 function destroy {
-    # Be nice and kill all nodes.
-    echo "<${INTERFACE} U 0 0 010 1 00>" >&$FILE_DESCRIPTOR # Send power off command.
+    # Be nice and kill all nodes then wait.
+    echo "<${INTERFACE} U 0 0 001 1 00>" >&$FILE_DESCRIPTOR # Send power off command.
+    echo "<${INTERFACE} X 0 0 003 0 00>" >&$FILE_DESCRIPTOR # Delete receiver.
+    echo "<${INTERFACE} X 0 0 002 0 00>" >&$FILE_DESCRIPTOR # Delete receiver.
+    echo "<${INTERFACE} X 0 0 001 0 00>" >&$FILE_DESCRIPTOR # Delete receiver.
     sleep 1
 
-    echo "<${INTERFACE} X 0 0 030 0 00>" >&$FILE_DESCRIPTOR # Delete receiver.
-    echo "<${INTERFACE} X 0 0 010 0 00>" >&$FILE_DESCRIPTOR # Delete receiver.
-    echo "<${INTERFACE} X 0 0 020 0 00>" >&$FILE_DESCRIPTOR # Delete receiver.
-    echo "<${INTERFACE} D 0 0 010 0 00>" >&$FILE_DESCRIPTOR # Delete cyclic sender.
-    sleep 1
+    # Kill cyclic sender after all nodes received message.
+    echo "<${INTERFACE} D 0 0 001 0 00>" >&$FILE_DESCRIPTOR # Delete cyclic sender.
+
+    # Kill file descriptor.
+    exec $FILE_DESCRIPTOR>&-
 
     # Kill server.
     kill $PID_SERVER
-
-    # Kill file descriptor.
-    exec {FILE_DESCRIPTOR}>&-
-
-    echo "After exit."
 
     # Destroy network interface.
     ip link set down $INTERFACE
@@ -88,6 +85,7 @@ function destroy {
 }
 
 # Let kernel trap shell exit interruptions.
+trap destroy EXIT
 trap destroy SIGTERM
 trap destroy SIGINT
 trap destroy SIGHUP
@@ -95,44 +93,46 @@ trap destroy SIGHUP
 # Send commands to server through file descriptor to socket:
 
 # < INTERFACE ADD_CYCLE DELAY_SEC DELAY_US HEX_ADDRESS N_BYTES SPACE_SEPARATED_HEX_BYTES >
-echo "<${INTERFACE} A 0 ${DELAY_US} 010 1 01>" >&$FILE_DESCRIPTOR
-sleep 1
+echo "<${INTERFACE} A 0 ${DELAY_US} 001 1 01>" >&$FILE_DESCRIPTOR
 
 # < INTERFACE RECEIVE_FROM DELAY_SEC DELAY_US HEX_ADDRESS N_BYTES FILTER >
-echo "<${INTERFACE} R 0 0 010 1 FF>" >&$FILE_DESCRIPTOR
-echo "<${INTERFACE} R 0 0 020 1 FF>" >&$FILE_DESCRIPTOR
-echo "<${INTERFACE} R 0 0 030 1 FF>" >&$FILE_DESCRIPTOR
-sleep 1
+echo "<${INTERFACE} R 0 0 001 1 FF>" >&$FILE_DESCRIPTOR
+echo "<${INTERFACE} R 0 0 002 1 FF>" >&$FILE_DESCRIPTOR
+echo "<${INTERFACE} R 0 0 003 1 FF>" >&$FILE_DESCRIPTOR
+
+# Main loop.
+#while true :
+#do
+#    # Read server output from file descriptor.
+#    read -t 0.001 -d '' -u $FILE_DESCRIPTOR CAN_INPUT
+#    echo $CAN_INPUT
+#
+#    # Read from standard input with 5 second timeout.
+#    read -t 5 SYNC
+#
+#    if [[ "$?" > 128 ]]
+#    then
+#        echo "SYNC timeout!"
+#        break
+#    elif [ "$SYNC" == 'ON' ]
+#    then
+#        continue
+#    elif [ "$SYNC" == 'OFF' ]
+#    then
+#        echo 'Power down command received!'
+#        break
+#    else
+#        echo 'Ill command received from computer.'
+#        break
+#    fi
+#done
 
 # Main loop.
 while true :
 do
     # Read server output from file descriptor.
-    read -t 0.001 -d '' -u $FILE_DESCRIPTOR -r CAN_INPUT
-
-    if [ "$CAN_INPUT" != '' ]
-    then
-      echo "$CAN_INPUT"
-    fi
-
-    # Read from standard input with 8 second timeout.
-    read -t 8 -r SYNC
-
-    if [[ $? -gt 128 ]]
-    then
-        echo "SYNC timeout!"
-        break
-    elif [ "$SYNC" == 'ON' ]
-    then
-        continue
-    elif [ "$SYNC" == 'OFF' ]
-    then
-        echo 'Power down command received!'
-        break
-    else
-        echo 'Ill command received from computer.'
-        break
-    fi
+    read -t 0.001 -d '' -u $FILE_DESCRIPTOR CAN_INPUT
+    echo $CAN_INPUT
 done
 
 destroy
