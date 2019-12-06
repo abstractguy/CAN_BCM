@@ -67,7 +67,7 @@ exec {FILE_DESCRIPTOR}<>$SOCKET
 
 function destroy {
     # Be nice and kill all nodes then wait.
-    echo "<${INTERFACE} X 0 0 010 0 00>" >&$FILE_DESCRIPTOR # Delete receiver.
+    echo "<${INTERFACE} X 0 0 001 0 00>" >&$FILE_DESCRIPTOR # Delete receiver.
     sleep 1
 
     # Kill file descriptor.
@@ -101,7 +101,7 @@ function time_precise {
 # Send commands to server through file descriptor to socket:
 
 # < INTERFACE RECEIVE_FROM DELAY_SEC DELAY_US HEX_ADDRESS N_BYTES FILTER >
-echo "<${INTERFACE} R 0 0 010 1 FF>" >&$FILE_DESCRIPTOR
+echo "<${INTERFACE} R 0 0 001 1 FF>" >&$FILE_DESCRIPTOR
 
 # Main loop.
 while true :
@@ -109,7 +109,7 @@ do
     # Read server output from file descriptor.
     read -t 0.001 -d '' -u $FILE_DESCRIPTOR CAN_INPUT
 
-    if [ "$CAN_INPUT" == "< ${INTERFACE} R 0 0 010 1 01 >" ]
+    if [ "$CAN_INPUT" == "< ${INTERFACE} R 0 0 001 1 01 >" ]
     then
         TIME=$(time_precise)
         while true:
@@ -147,9 +147,9 @@ do
             fi
         done
 
-        echo "<${INTERFACE} S 0 0 030 1 ${MOTOR_STATE}>" > &$FILE_DESCRIPTOR
+        echo "<${INTERFACE} S 0 0 003 1 ${MOTOR_STATE}>" > &$FILE_DESCRIPTOR
 
-    elif [ "$CAN_INPUT" == "< ${INTERFACE} R 0 0 010 1 00 >" ]
+    elif [ "$CAN_INPUT" == "< ${INTERFACE} R 0 0 001 1 00 >" ]
     then
         echo "Power down command received!"
         break
