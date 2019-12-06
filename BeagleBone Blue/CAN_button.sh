@@ -1,3 +1,4 @@
+#!/bin/bash
 # Program:       CAN_button.sh
 # Creator:       Samuel Duclos
 # Comments:      This file is directly invoked using source.
@@ -9,7 +10,7 @@
 # Modifiable variables.
 INTERFACE_TYPE=vcan
 BITRATE=50000
-DELAY_US=5000
+DELAY_US=500000
 
 # Non-modifiable variables.
 INTERFACE=$INTERFACE_TYPE'0'
@@ -22,7 +23,7 @@ BUTTON=$GPIO'/gpio69/value'
 BUTTON_STATE=1
 MOTOR_STATE=0x00
 
-# Set green and red LEDs to persistent mode.
+# Set green LED to persistent mode.
 echo 'none' > $GREEN_LED/trigger
 echo 'none' > $RED_LED/trigger
 
@@ -51,30 +52,29 @@ fi
 # Setup interface if it doesn't exist.
 if [ ! -e /sys/class/net/$INTERFACE ]
 then
-    ip link add dev $INTERFACE type $INTERFACE_TYPE $BITRATE
+    ip link add dev $INTERFACE type $INTERFACE_TYPE
 fi
 
 # Making sure the interface is up.
-ip link set up $INTERFACE
+eval "ip link set up $INTERFACE type $INTERFACE_TYPE $BITRATE"
 
-# Start CAN broadcast manager and wait for it to boot.
+# Starting CAN broadcast manager.
 bcmserver &
 PID_SERVER=$!
-sleep 1
+sleep 1 # Waiting for server to boot.
 
 # Linking socket to file descriptor to be used.
 exec {FILE_DESCRIPTOR}<>$SOCKET
 
 function destroy {
-    # Be nice and kill all nodes then wait.
     echo "<${INTERFACE} X 0 0 001 0 00>" >&$FILE_DESCRIPTOR # Delete receiver.
     sleep 1
 
-    # Kill file descriptor.
-    exec $FILE_DESCRIPTOR>&-
-
     # Kill server.
     kill $PID_SERVER
+
+    # Kill file descriptor.
+    exec {FILE_DESCRIPTOR}>&-
 
     # Destroy network interface.
     ip link set down $INTERFACE
@@ -89,32 +89,32 @@ function destroy {
 }
 
 # Let kernel trap shell exit interruptions.
-trap destroy EXIT
 trap destroy SIGTERM
 trap destroy SIGINT
 trap destroy SIGHUP
-
-function time_precise {
-    $(($(date +%s) * 1000000000 + $(date +%N)))
-}
 
 # Send commands to server through file descriptor to socket:
 
 # < INTERFACE RECEIVE_FROM DELAY_SEC DELAY_US HEX_ADDRESS N_BYTES FILTER >
 echo "<${INTERFACE} R 0 0 001 1 FF>" >&$FILE_DESCRIPTOR
+sleep 1
+
+function time_precise {
+    $(($(date +%s) * 1000000000 + $(date +%N)))
+}
 
 # Main loop.
 while true :
 do
     # Read server output from file descriptor.
-    read -t 0.001 -d '' -u $FILE_DESCRIPTOR CAN_INPUT
+    read -t 0.001 -d '' -u $FILE_DESCRIPTOR -r CAN_INPUT
 
     if [ "$CAN_INPUT" == "< ${INTERFACE} R 0 0 001 1 01 >" ]
     then
         TIME=$(time_precise)
         while true:
         do
-            if [ $(cat $BUTTON) == 1 ]
+            if [ "$(cat $BUTTON)" == 1 ]
             then
                 if [ "$BUTTON_STATE" == 0 ]
                 then
@@ -139,7 +139,7 @@ do
                 fi
             fi
 
-            if [[ $(($(time_precise) - $TIME)) > 3000000 ]]
+            if [[ $(($(time_precise) - TIME)) -gt 3000000 ]]
             then
                 break
             else
@@ -147,7 +147,7 @@ do
             fi
         done
 
-        echo "<${INTERFACE} S 0 0 003 1 ${MOTOR_STATE}>" > &$FILE_DESCRIPTOR
+        echo "<${INTERFACE} S 0 0 003 1 ${MOTOR_STATE}>" >&$FILE_DESCRIPTOR
 
     elif [ "$CAN_INPUT" == "< ${INTERFACE} R 0 0 001 1 00 >" ]
     then
@@ -158,7 +158,7 @@ do
         break
     fi
 
-    echo $CAN_INPUT
+    echo "$CAN_INPUT"
 done
 
 destroy
