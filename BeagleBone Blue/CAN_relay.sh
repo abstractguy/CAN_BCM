@@ -20,8 +20,7 @@ GREEN_LED=/sys/class/leds/green
 RED_LED=/sys/class/leds/red
 GPIO=/sys/class/gpio
 BUTTON=$GPIO/gpio69
-BUTTON_STATE=1
-MOTOR_STATE=0x00
+MOTOR_STATE=0x01
 
 # Ensure kernel modules are loaded.
 modprobe can
