@@ -23,7 +23,6 @@
   PROCESSUSCLIGNOTANT_TEMPS_LONG_ALLUME_EN_MS * FREQUENCE_DE_LA_BASE_DE_TEMPS_EN_HZ \
   /1000.0)
 
-    
 //Declarations de fonctions privees:
 void processusClignotant_eteintUnPeu(void);
 void processusClignotant_allumeUnPeu(void);
@@ -36,42 +35,31 @@ unsigned char processusClignotant_donneesRecues[8];
 unsigned char processusClignotant_donneesATransmettre[8];
 
 //Definitions de fonctions privees:
-void processusClignotant_eteintUnPeu(void)
-{
+void processusClignotant_eteintUnPeu(void) {
   processusClignotant_compteur++;
   if (processusClignotant_compteur < PROCESSUSCLIGNOTANT_COMPTE_COURT_ETEINT)
-  {
     return;
-  }
   processusClignotant_compteur = 0;
-  //interfaceT1_allume();
   serviceBaseDeTemps_execute[PROCESSUSCLIGNOTANT_PHASE] =
       processusClignotant_allumeUnPeu;
   
- 
   piloteCAN1_transmetDesDonnes(PILOTECAN1_IDENTIFICATION_EN_TRANSMISSION,
                                processusClignotant_donneesATransmettre,
                                1);
-  processusClignotant_donneesATransmettre[0]++; 
 }
 
 void processusClignotant_allumeUnPeu(void)
 {
   processusClignotant_compteur++;
   if (processusClignotant_compteur < PROCESSUSCLIGNOTANT_COMPTE_COURT_ALLUME)
-  {
     return;
-  }
   
   piloteCAN1_litUnMessageRecu(processusClignotant_donneesRecues); 
   
   processusClignotant_compteur = 0;
 
-  if (processusClignotant_donneesRecues[0] == 0x00) {
-      interfaceT1_eteint();
-  } else if (processusClignotant_donneesRecues[0] == 0x01) {
-      interfaceT1_allume();
-  }
+  if (processusClignotant_donneesRecues[0] == 0x03) interfaceT1_allume();
+  else interfaceT1_eteint();
 
   serviceBaseDeTemps_execute[PROCESSUSCLIGNOTANT_PHASE] =
       processusClignotant_eteintLongtemps;  
@@ -81,11 +69,8 @@ void processusClignotant_eteintLongtemps(void)
 {
   processusClignotant_compteur++;
   if (processusClignotant_compteur < PROCESSUSCLIGNOTANT_COMPTE_LONG_ETEINT)
-  {
     return;
-  }
   processusClignotant_compteur = 0;
-  interfaceT1_allume();
   serviceBaseDeTemps_execute[PROCESSUSCLIGNOTANT_PHASE] =
       processusClignotant_allumeLongtemps;
 }
@@ -94,11 +79,8 @@ void processusClignotant_allumeLongtemps(void)
 {
   processusClignotant_compteur++;
   if (processusClignotant_compteur < PROCESSUSCLIGNOTANT_COMPTE_LONG_ALLUME)
-  {
     return;
-  }
   processusClignotant_compteur = 0;
-  interfaceT1_eteint();
   serviceBaseDeTemps_execute[PROCESSUSCLIGNOTANT_PHASE] =
       processusClignotant_eteintUnPeu;  
 }
@@ -107,11 +89,9 @@ void processusClignotant_allumeLongtemps(void)
 //pas de variables publiques
 
 //Definitions de fonctions publiques:
-void processusClignotant_initialise(void)
-{
-  processusClignotant_donneesATransmettre[0] = 0x01;
+void processusClignotant_initialise(void) {
+  //processusClignotant_donneesATransmettre[0] = 0x01;
   processusClignotant_compteur = 0;
-  interfaceT1_eteint();
   serviceBaseDeTemps_execute[PROCESSUSCLIGNOTANT_PHASE] =
       processusClignotant_eteintUnPeu;
 }

@@ -57,11 +57,10 @@ void processusBoutonConnecte_changeT2(void) {
 }
 
 unsigned char processusBoutonConnecte_valideLesDonneesRecues(void) {
-  for (unsigned char i = 0; i < NOMBRE_D_OCTETS_A_RECEVOIR; i++) {
-    if ((processusBoutonConnecte_octetsRecus[i] & 0xF7) != 0x00) {
-      return ERREUR;
-    }
+  if ((processusBoutonConnecte_octetsRecus[0] & 0xFC) != 0x00) {
+    return ERREUR;
   }
+  
   return PAS_D_ERREURS;  
 }
 
@@ -112,8 +111,6 @@ void processusBoutonConnecte_initialise(void) {
   interfaceT2_eteint();
   interfaceT3_eteint();
   interfaceT4_eteint();
-  for (unsigned char i = 0; i < NOMBRE_D_OCTETS_A_TRANSMETTRE; i++)
-    processusBoutonConnecte_octetsATransmettre[i] = i;
   serviceBaseDeTemps_execute[PROCESSUSBOUTONCONNECTE_PHASE] =
       processusBoutonConnecte_attendUneReponse;
 }

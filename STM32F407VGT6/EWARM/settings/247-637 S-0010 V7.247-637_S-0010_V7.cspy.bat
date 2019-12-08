@@ -25,7 +25,7 @@ if not "%~1" == "" goto debugFile
 
 @echo on 
 
-"C:\Program Files (x86)\IAR Systems\Embedded Workbench 7.5\common\bin\cspybat" -f "U:\FRÉDÉRIC DION\Projet\5e session\Logiciels\STM32F407VGT6 - Copy\EWARM\settings\247-637 S-0010 V7.247-637_S-0010_V7.general.xcl" --backend -f "U:\FRÉDÉRIC DION\Projet\5e session\Logiciels\STM32F407VGT6 - Copy\EWARM\settings\247-637 S-0010 V7.247-637_S-0010_V7.driver.xcl" 
+"C:\Program Files (x86)\IAR Systems\Embedded Workbench 7.5\common\bin\cspybat" -f "U:\FRÉDÉRIC DION\Projet\5e session\Logiciels\STM32F407VGT6\EWARM\settings\247-637 S-0010 V7.247-637_S-0010_V7.general.xcl" --backend -f "U:\FRÉDÉRIC DION\Projet\5e session\Logiciels\STM32F407VGT6\EWARM\settings\247-637 S-0010 V7.247-637_S-0010_V7.driver.xcl" 
 
 @echo off 
 goto end 
@@ -34,7 +34,7 @@ goto end
 
 @echo on 
 
-"C:\Program Files (x86)\IAR Systems\Embedded Workbench 7.5\common\bin\cspybat" -f "U:\FRÉDÉRIC DION\Projet\5e session\Logiciels\STM32F407VGT6 - Copy\EWARM\settings\247-637 S-0010 V7.247-637_S-0010_V7.general.xcl" "--debug_file=%~1" --backend -f "U:\FRÉDÉRIC DION\Projet\5e session\Logiciels\STM32F407VGT6 - Copy\EWARM\settings\247-637 S-0010 V7.247-637_S-0010_V7.driver.xcl" 
+"C:\Program Files (x86)\IAR Systems\Embedded Workbench 7.5\common\bin\cspybat" -f "U:\FRÉDÉRIC DION\Projet\5e session\Logiciels\STM32F407VGT6\EWARM\settings\247-637 S-0010 V7.247-637_S-0010_V7.general.xcl" "--debug_file=%~1" --backend -f "U:\FRÉDÉRIC DION\Projet\5e session\Logiciels\STM32F407VGT6\EWARM\settings\247-637 S-0010 V7.247-637_S-0010_V7.driver.xcl" 
 
 @echo off 
 :end
