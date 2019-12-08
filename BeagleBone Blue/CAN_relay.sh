@@ -19,12 +19,14 @@ SOCKET=/dev/tcp/127.0.0.1/28600
 GREEN_LED=/sys/class/leds/green
 RED_LED=/sys/class/leds/red
 GPIO=/sys/class/gpio
-BUTTON=$GPIO'/gpio69/value'
+BUTTON=$GPIO/gpio69
 BUTTON_STATE=1
 MOTOR_STATE=0x00
 
 # Ensure kernel modules are loaded.
-modprobe can can_bcm vcan
+modprobe can
+modprobe can_bcm
+modprobe vcan
 
 # Set green LED to persistent mode.
 echo 'none' > $GREEN_LED/trigger
@@ -36,6 +38,7 @@ echo '0' > $RED_LED/brightness
 
 # Configure user button 2 (PAUSE_BTN, GPIO2_5).
 echo 69 > $GPIO/export
+echo 'rising' > $BUTTON/edge
 
 if [ ! -e /dev/tcp ]
 then
@@ -91,6 +94,7 @@ function destroy {
     ip link delete dev $INTERFACE type $INTERFACE_TYPE
 
     # Configure user button 2 (PAUSE_BTN, GPIO2_5).
+    echo 'none' > $BUTTON/edge
     echo 69 > $GPIO/unexport
 
     # Turn green LED off and red LED on.
@@ -116,8 +120,10 @@ echo "<${INTERFACE} R 0 0 003 1 FF>" >&$FILE_DESCRIPTOR
 sleep 1
 
 function time_precise {
-    $(($(date +%s) * 1000000000 + $(date +%N)))
+    echo $(($(date +%s%N) / 1000))
 }
+
+EDGE_OLD=$(cat /proc/interrupts | grep gpiolib)
 
 # Main loop.
 while true :
