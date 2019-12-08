@@ -37,7 +37,7 @@ echo '255' > $GREEN_LED/brightness
 echo '0' > $RED_LED/brightness
 
 # Configure user button 2 (PAUSE_BTN, GPIO2_5).
-echo '69' > $GPIO/export
+echo 69 > $GPIO/export
 echo 'rising' > $BUTTON/edge
 
 if [ ! -e /dev/tcp ]
