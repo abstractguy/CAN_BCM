@@ -8,7 +8,6 @@
 #include "interfaceT2.h"
 #include "interfaceT3.h"
 #include "interfaceT4.h"
-#include "interfaceB1.h"
 #include "processusBoutonConnecte.h"
 
 //Definitions privees
@@ -37,8 +36,6 @@ typedef struct {
 void processusBoutonConnecte_changeT2(void);
 unsigned char processusBoutonConnecte_valideLesDonneesRecues(void);
 void processusBoutonConnecte_traiteLesDonneesRecues(void);
-void processusBoutonConnecte_attendApresLeBouton(void);
-void processusBoutonConnecte_attendUneDemande(void);
 void processusBoutonConnecte_attendUneReponse(void);
 
 //Definitions de variables privees:
@@ -75,28 +72,6 @@ void processusBoutonConnecte_traiteLesDonneesRecues(void) { //exemple de traitem
   }  
 }
 
-void processusBoutonConnecte_attendApresLeBouton(void) {
-  if (interfaceB1.etatDuModule == MODULE_PAS_EN_FONCTION)
-    return;
-  serviceBaseDeTemps_execute[PROCESSUSBOUTONCONNECTE_PHASE] =
-    processusBoutonConnecte_attendUneDemande;
-  processusBoutonConnecte_attendUneDemande(); //on sauve une interruption    
-}
-
-void processusBoutonConnecte_attendUneDemande(void) {
-  if (interfaceB1.information == INFORMATION_TRAITEE)
-    return;
-  interfaceB1.information = INFORMATION_TRAITEE;
-  if (interfaceB1.etatDuBouton == INTERFACEB1_RELACHE)
-    return;
-  processusBoutonConnecte_compteur = 0;
-  interfaceT4_eteint(); //T4 sert a indiquer les erreurs detectees par interfaceS0008
-  interfaceT3_eteint(); //T3 sert a indiquer les erreurs detectees par processusBoutonConnecte
-  communication.requete = REQUETE_ACTIVE;
-  serviceBaseDeTemps_execute[PROCESSUSBOUTONCONNECTE_PHASE] =
-    processusBoutonConnecte_attendUneReponse;
-}
-
 void processusBoutonConnecte_attendUneReponse(void) {
   processusBoutonConnecte_compteur++;
   if (processusBoutonConnecte_compteur ==
@@ -104,14 +79,14 @@ void processusBoutonConnecte_attendUneReponse(void) {
     processusBoutonConnecte_compteur = 0;
     interfaceT4_allume();
     serviceBaseDeTemps_execute[PROCESSUSBOUTONCONNECTE_PHASE] =
-        processusBoutonConnecte_attendUneDemande;
+        processusBoutonConnecte_attendUneReponse;
     return;
   }
   if (communication.information == INFORMATION_TRAITEE)
     return;
   communication.information = INFORMATION_TRAITEE;
   serviceBaseDeTemps_execute[PROCESSUSBOUTONCONNECTE_PHASE] =
-    processusBoutonConnecte_attendUneDemande;
+    processusBoutonConnecte_attendUneReponse;
  
   processusBoutonConnecte_changeT2();
   if (communication.statut != PAS_D_ERREURS) {
@@ -131,6 +106,7 @@ void processusBoutonConnecte_attendUneReponse(void) {
 
 //Definitions de fonctions publiques:
 void processusBoutonConnecte_initialise(void) {
+  communication.requete = REQUETE_ACTIVE;
   processusBoutonConnecte_compteur = 0;
   processusBoutonConnecte_etatDeT2 = 0;
   interfaceT2_eteint();
@@ -139,5 +115,5 @@ void processusBoutonConnecte_initialise(void) {
   for (unsigned char i = 0; i < NOMBRE_D_OCTETS_A_TRANSMETTRE; i++)
     processusBoutonConnecte_octetsATransmettre[i] = i;
   serviceBaseDeTemps_execute[PROCESSUSBOUTONCONNECTE_PHASE] =
-      processusBoutonConnecte_attendApresLeBouton;
+      processusBoutonConnecte_attendUneReponse;
 }

@@ -1169,12 +1169,6 @@
     <group>
       <name>User</name>
       <file>
-        <name>$PROJ_DIR$\..\Src\interfaceB1.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\Src\interfaceB1.h</name>
-      </file>
-      <file>
         <name>$PROJ_DIR$\..\Src\interfaceT1.c</name>
       </file>
       <file>

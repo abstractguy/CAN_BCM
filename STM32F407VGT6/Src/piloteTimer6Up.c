@@ -37,7 +37,7 @@ void piloteTimer6Up_permetLesInterruptions(void)
 }
 
 void piloteTimer6Up_initialise(void)
-{  
+{
   piloteTimer6Up_execute = neFaitRien;  
 }
 

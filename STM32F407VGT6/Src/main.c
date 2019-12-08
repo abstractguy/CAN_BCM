@@ -44,7 +44,6 @@
 #include "piloteIOT3.h"
 #include "piloteIOT4.h"
 #include "serviceBaseDeTemps.h"
-#include "interfaceB1.h"
 #include "interfaceT1.h"
 #include "interfaceT2.h"
 #include "interfaceT3.h"
@@ -104,7 +103,6 @@ void main_initialiseAvantLeHAL(void)
   piloteIOT3_initialise();
   piloteIOT4_initialise();
   serviceBaseDeTemps_initialise();
-  interfaceB1_initialise();
   interfaceT1_initialise();
   interfaceT2_initialise();
   interfaceT3_initialise();

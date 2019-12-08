@@ -1,30 +1,30 @@
-"U:\FRÉDÉRIC DION\Projet\5e session\Logiciels\STM32F407VGT6\Src\interfaceT2.c"
+"U:\FRÉDÉRIC DION\Projet\5e session\Logiciels\STM32F407VGT6 - Copy\Src\interfaceT2.c"
 -std=c99
 -ferror-limit=100
 -I
-U:\FRÉDÉRIC DION\Projet\5e session\Logiciels\STM32F407VGT6\EWARM/../Inc
+U:\FRÉDÉRIC DION\Projet\5e session\Logiciels\STM32F407VGT6 - Copy\EWARM/../Inc
 -I
-U:\FRÉDÉRIC DION\Projet\5e session\Logiciels\STM32F407VGT6\EWARM/../Drivers/STM32F4xx_HAL_Driver/Inc
+U:\FRÉDÉRIC DION\Projet\5e session\Logiciels\STM32F407VGT6 - Copy\EWARM/../Drivers/STM32F4xx_HAL_Driver/Inc
 -I
-U:\FRÉDÉRIC DION\Projet\5e session\Logiciels\STM32F407VGT6\EWARM/../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy
+U:\FRÉDÉRIC DION\Projet\5e session\Logiciels\STM32F407VGT6 - Copy\EWARM/../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy
 -I
-U:\FRÉDÉRIC DION\Projet\5e session\Logiciels\STM32F407VGT6\EWARM/../Drivers/CMSIS/Device/ST/STM32F4xx/Include
+U:\FRÉDÉRIC DION\Projet\5e session\Logiciels\STM32F407VGT6 - Copy\EWARM/../Drivers/CMSIS/Device/ST/STM32F4xx/Include
 -I
-U:\FRÉDÉRIC DION\Projet\5e session\Logiciels\STM32F407VGT6\EWARM/../Drivers/CMSIS/Include
+U:\FRÉDÉRIC DION\Projet\5e session\Logiciels\STM32F407VGT6 - Copy\EWARM/../Drivers/CMSIS/Include
 -I
 C:\Program Files (x86)\IAR Systems\Embedded Workbench 7.5\arm\inc
 -I
 C:\Program Files (x86)\IAR Systems\Embedded Workbench 7.5\arm\inc\c
 -I
-U:\FRÉDÉRIC DION\Projet\5e session\Logiciels\STM32F407VGT6\Inc
+U:\FRÉDÉRIC DION\Projet\5e session\Logiciels\STM32F407VGT6 - Copy\Inc
 -I
-U:\FRÉDÉRIC DION\Projet\5e session\Logiciels\STM32F407VGT6\Drivers\STM32F4xx_HAL_Driver\Inc
+U:\FRÉDÉRIC DION\Projet\5e session\Logiciels\STM32F407VGT6 - Copy\Drivers\STM32F4xx_HAL_Driver\Inc
 -I
-U:\FRÉDÉRIC DION\Projet\5e session\Logiciels\STM32F407VGT6\Drivers\STM32F4xx_HAL_Driver\Inc\Legacy
+U:\FRÉDÉRIC DION\Projet\5e session\Logiciels\STM32F407VGT6 - Copy\Drivers\STM32F4xx_HAL_Driver\Inc\Legacy
 -I
-U:\FRÉDÉRIC DION\Projet\5e session\Logiciels\STM32F407VGT6\Drivers\CMSIS\Device\ST\STM32F4xx\Include
+U:\FRÉDÉRIC DION\Projet\5e session\Logiciels\STM32F407VGT6 - Copy\Drivers\CMSIS\Device\ST\STM32F4xx\Include
 -I
-U:\FRÉDÉRIC DION\Projet\5e session\Logiciels\STM32F407VGT6\Drivers\CMSIS\Include
+U:\FRÉDÉRIC DION\Projet\5e session\Logiciels\STM32F407VGT6 - Copy\Drivers\CMSIS\Include
 -DUSE_HAL_DRIVER=1
 -DSTM32F407xx=1
 -D__CHAR_BITS__=8
