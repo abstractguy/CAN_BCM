@@ -20,8 +20,7 @@ GREEN_LED=/sys/class/leds/green
 RED_LED=/sys/class/leds/red
 GPIO=/sys/class/gpio
 BUTTON=$GPIO/gpio69
-BUTTON_STATE=1
-MOTOR_STATE=0x00
+MOTOR_STATE=0x01
 
 # Ensure kernel modules are loaded.
 modprobe can
@@ -118,7 +117,7 @@ do
     # Read server output from file descriptor.
     read -t 0.001 -d '' -u $FILE_DESCRIPTOR -r CAN_INPUT
 
-    if [ "$CAN_INPUT" == "< ${INTERFACE} R 0 0 001 1 01 >" ]
+    if [ "$CAN_INPUT" == "< ${INTERFACE} R 0 0 001 1 03 >" ]
     then
         TIME=$(time_precise)
         while true:
@@ -128,17 +127,17 @@ do
             then
                 echo "User button pressed!"
                 EDGE_OLD=$EDGE
-                if [ "$MOTOR_STATE" == 0x01 ]
+                if [ "$MOTOR_STATE" == 0x03 ]
                 then
-                    MOTOR_STATE=0x00
-                else
                     MOTOR_STATE=0x01
+                else
+                    MOTOR_STATE=0x03
                 fi
 
                 echo 'Motor state: '$MOTOR_STATE
             fi
 
-            if [[ $(($(time_precise) - TIME)) -gt 3000 ]]
+            if [[ $(($(time_precise) - TIME)) -gt 3300 ]]
             then
                 break
             else
