@@ -23,6 +23,9 @@ BUTTON=$GPIO'/gpio69/value'
 BUTTON_STATE=1
 MOTOR_STATE=0x00
 
+# Ensure kernel modules are loaded.
+modprobe can can_bcm vcan
+
 # Set green LED to persistent mode.
 echo 'none' > $GREEN_LED/trigger
 echo 'none' > $RED_LED/trigger
