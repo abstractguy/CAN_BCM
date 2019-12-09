@@ -1,0 +1,9 @@
+C:\Users\1040386\Desktop\ProcessStartTest\ProcessStartTest\bin\Debug\ProcessStartTest.exe
+C:\Users\1040386\Desktop\ProcessStartTest\ProcessStartTest\bin\Debug\ProcessStartTest.pdb
+C:\Users\1040386\Desktop\ProcessStartTest\ProcessStartTest\obj\Debug\ProcessStartTest.csprojAssemblyReference.cache
+C:\Users\1040386\Desktop\ProcessStartTest\ProcessStartTest\obj\Debug\ProcessStartTest.StartupForm.resources
+C:\Users\1040386\Desktop\ProcessStartTest\ProcessStartTest\obj\Debug\ProcessStartTest.Properties.Resources.resources
+C:\Users\1040386\Desktop\ProcessStartTest\ProcessStartTest\obj\Debug\ProcessStartTest.csproj.GenerateResource.cache
+C:\Users\1040386\Desktop\ProcessStartTest\ProcessStartTest\obj\Debug\ProcessStartTest.csproj.CoreCompileInputs.cache
+C:\Users\1040386\Desktop\ProcessStartTest\ProcessStartTest\obj\Debug\ProcessStartTest.exe
+C:\Users\1040386\Desktop\ProcessStartTest\ProcessStartTest\obj\Debug\ProcessStartTest.pdb

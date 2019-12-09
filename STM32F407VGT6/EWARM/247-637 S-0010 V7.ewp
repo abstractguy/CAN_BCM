@@ -1010,12 +1010,6 @@
         <name>$PROJ_DIR$\..\Src\piloteCAN1.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\Src\piloteIOB1.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\Src\piloteIOB1.h</name>
-      </file>
-      <file>
         <name>$PROJ_DIR$\..\Src\piloteIOT1.c</name>
       </file>
       <file>

@@ -38,7 +38,6 @@
 
 #include "piloteTimer6Up.h"
 #include "piloteCAN1.h"
-#include "piloteIOB1.h"
 #include "piloteIOT1.h"
 #include "piloteIOT2.h"
 #include "piloteIOT3.h"
@@ -97,7 +96,6 @@ void main_initialiseAvantLeHAL(void)
 {
   piloteTimer6Up_initialise();
   //piloteCAN1_initialise(); //irait ici en temps normal... mais il y a un bug dans le cube
-  piloteIOB1_initialise();
   piloteIOT1_initialise();
   piloteIOT2_initialise();
   piloteIOT3_initialise();
