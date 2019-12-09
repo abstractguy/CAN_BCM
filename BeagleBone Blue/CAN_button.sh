@@ -20,7 +20,7 @@ GREEN_LED=/sys/class/leds/green
 RED_LED=/sys/class/leds/red
 GPIO=/sys/class/gpio
 BUTTON=$GPIO/gpio69
-MOTOR_STATE=0x01
+MOTOR_STATE='01'
 
 # Ensure kernel modules are loaded.
 modprobe can
@@ -111,33 +111,39 @@ function time_precise {
 
 EDGE_OLD=$(cat /proc/interrupts | grep gpiolib)
 
+sleep 5
+
 # Main loop.
 while true :
 do
     # Read server output from file descriptor.
-    read -t 0.001 -d '' -u $FILE_DESCRIPTOR -r CAN_INPUT
+    read -t 0.006 -d '' -u $FILE_DESCRIPTOR -r CAN_INPUT
 
-    if [ "$CAN_INPUT" == "< ${INTERFACE} R 0 0 001 1 03 >" ]
+    echo $CAN_INPUT
+    if [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 01 >" ] || [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 03 >" ] || [ "$CAN_INPUT" == '' ]
     then
         TIME=$(time_precise)
-        while true:
+        echo $TIME
+        while true :
         do
             EDGE=$(cat /proc/interrupts | grep gpiolib)
             if [ "$EDGE" != "$EDGE_OLD" ]
             then
                 echo "User button pressed!"
                 EDGE_OLD=$EDGE
-                if [ "$MOTOR_STATE" == 0x03 ]
+                if [ "$MOTOR_STATE" -eq 3 ]
                 then
-                    MOTOR_STATE=0x01
+                    MOTOR_STATE='01'
                 else
-                    MOTOR_STATE=0x03
+                    MOTOR_STATE='03'
                 fi
 
                 echo 'Motor state: '$MOTOR_STATE
             fi
 
-            if [[ $(($(time_precise) - TIME)) -gt 3300 ]]
+            echo $(($(time_precise) - TIME))
+
+            if [[ $(($(time_precise) - TIME)) -gt 30000 ]]
             then
                 break
             else
@@ -147,7 +153,7 @@ do
 
         echo "<${INTERFACE} S 0 0 003 1 ${MOTOR_STATE}>" >&$FILE_DESCRIPTOR
 
-    elif [ "$CAN_INPUT" == "< ${INTERFACE} R 0 0 001 1 00 >" ]
+    elif [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 00 >" ]
     then
         echo "Power down command received!"
         break
