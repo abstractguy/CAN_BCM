@@ -8,7 +8,7 @@
 # Example usage: sudo --prompt=temppwd su -c 'source /home/debian/CAN_button.sh' --preserve-environment
 
 # Modifiable variables.
-INTERFACE_TYPE=vcan
+INTERFACE_TYPE=can
 BITRATE=50000
 DELAY_US=500000
 
@@ -117,13 +117,14 @@ sleep 5
 while true :
 do
     # Read server output from file descriptor.
-    read -t 0.006 -d '' -u $FILE_DESCRIPTOR -r CAN_INPUT
-
-    echo $CAN_INPUT
-    if [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 01 >" ] || [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 03 >" ] || [ "$CAN_INPUT" == '' ]
+    read -t 0.001 -d '' -u $FILE_DESCRIPTOR -r CAN_INPUT
+    if [ "$CAN_INPUT" == '' ] && [[ $(($(time_precise) - TIME)) -gt 8000000 ]]
+    then
+        break
+    elif [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 01 >" ] || [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 03 >" ] || [ "$CAN_INPUT" == '' ]
     then
         TIME=$(time_precise)
-        echo $TIME
+        echo $CAN_INPUT
         while true :
         do
             EDGE=$(cat /proc/interrupts | grep gpiolib)
@@ -141,9 +142,7 @@ do
                 echo 'Motor state: '$MOTOR_STATE
             fi
 
-            echo $(($(time_precise) - TIME))
-
-            if [[ $(($(time_precise) - TIME)) -gt 30000 ]]
+            if [[ $(($(time_precise) - TIME)) -gt 3300 ]]
             then
                 break
             else
