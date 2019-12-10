@@ -10,7 +10,7 @@
 # Modifiable variables.
 INTERFACE_TYPE=can
 BITRATE=50000
-DELAY_US=500000
+DELAY_US=60000
 
 # Non-modifiable variables.
 INTERFACE=$INTERFACE_TYPE'0'
@@ -18,13 +18,8 @@ BITRATE='bitrate '$BITRATE
 SOCKET=/dev/tcp/127.0.0.1/28600
 GREEN_LED=/sys/class/leds/green
 RED_LED=/sys/class/leds/red
-GPIO=/sys/class/gpio
-BUTTON=$GPIO/gpio69
-MOTOR_STATE=0x01
 
 # Ensure kernel modules are loaded.
-modprobe can
-modprobe can_bcm
 modprobe vcan
 
 # Set green LED to persistent mode.
@@ -34,10 +29,6 @@ echo 'none' > $RED_LED/trigger
 # Turn green LED on and red LED off.
 echo '255' > $GREEN_LED/brightness
 echo '0' > $RED_LED/brightness
-
-# Configure user button 2 (PAUSE_BTN, GPIO2_5).
-echo 69 > $GPIO/export
-echo 'rising' > $BUTTON/edge
 
 if [ ! -e /dev/tcp ]
 then
@@ -74,13 +65,7 @@ exec {FILE_DESCRIPTOR}<>$SOCKET
 function destroy {
     # Be nice and kill all nodes.
     echo "<${INTERFACE} U 0 0 001 1 00>" >&$FILE_DESCRIPTOR # Send power off command.
-    sleep 1
-
-    echo "<${INTERFACE} X 0 0 003 0 00>" >&$FILE_DESCRIPTOR # Delete receiver.
-    echo "<${INTERFACE} X 0 0 002 0 00>" >&$FILE_DESCRIPTOR # Delete receiver.
-    echo "<${INTERFACE} X 0 0 001 0 00>" >&$FILE_DESCRIPTOR # Delete receiver.
-    echo "<${INTERFACE} D 0 0 001 0 00>" >&$FILE_DESCRIPTOR # Delete receiver.
-    sleep 1
+    sleep 0.5
 
     # Kill server.
     kill $PID_SERVER
@@ -91,10 +76,6 @@ function destroy {
     # Destroy network interface.
     ip link set down $INTERFACE
     ip link delete dev $INTERFACE type $INTERFACE_TYPE
-
-    # Configure user button 2 (PAUSE_BTN, GPIO2_5).
-    echo 'none' > $BUTTON/edge
-    echo 69 > $GPIO/unexport
 
     # Turn green LED off and red LED on.
     echo '0' > $GREEN_LED/brightness
@@ -110,19 +91,13 @@ trap destroy SIGHUP
 
 # < INTERFACE ADD_CYCLE DELAY_SEC DELAY_US HEX_ADDRESS N_BYTES SPACE_SEPARATED_HEX_BYTES >
 echo "<${INTERFACE} A 0 ${DELAY_US} 001 1 01>" >&$FILE_DESCRIPTOR
-sleep 1
+sleep 0.5
 
 # < INTERFACE RECEIVE_FROM DELAY_SEC DELAY_US HEX_ADDRESS N_BYTES FILTER >
 echo "<${INTERFACE} R 0 0 001 1 FF>" >&$FILE_DESCRIPTOR
 echo "<${INTERFACE} R 0 0 002 1 FF>" >&$FILE_DESCRIPTOR
 echo "<${INTERFACE} R 0 0 003 1 FF>" >&$FILE_DESCRIPTOR
-sleep 1
-
-function time_precise {
-    echo $(($(date +%s%N) / 1000))
-}
-
-EDGE_OLD=$(cat /proc/interrupts | grep gpiolib)
+sleep 0.5
 
 # Main loop.
 while true :
