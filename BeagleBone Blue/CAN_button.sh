@@ -10,7 +10,7 @@
 # Modifiable variables.
 INTERFACE_TYPE=can
 BITRATE=50000
-DELAY_US=500000
+DELAY_US=60000
 
 # Non-modifiable variables.
 INTERFACE=$INTERFACE_TYPE'0'
@@ -23,8 +23,6 @@ BUTTON=$GPIO/gpio69
 MOTOR_STATE='01'
 
 # Ensure kernel modules are loaded.
-modprobe can
-modprobe can_bcm
 modprobe vcan
 
 # Set green LED to persistent mode.
@@ -73,7 +71,7 @@ exec {FILE_DESCRIPTOR}<>$SOCKET
 
 function destroy {
     echo "<${INTERFACE} X 0 0 001 0 00>" >&$FILE_DESCRIPTOR # Delete receiver.
-    sleep 1
+    sleep 0.5
 
     # Kill server.
     kill $PID_SERVER
@@ -103,7 +101,6 @@ trap destroy SIGHUP
 
 # < INTERFACE RECEIVE_FROM DELAY_SEC DELAY_US HEX_ADDRESS N_BYTES FILTER >
 echo "<${INTERFACE} R 0 0 001 1 FF>" >&$FILE_DESCRIPTOR
-sleep 1
 
 function time_precise {
     echo $(($(date +%s%N) / 1000))
@@ -118,23 +115,35 @@ while true :
 do
     # Read server output from file descriptor.
     read -t 0.001 -d '' -u $FILE_DESCRIPTOR -r CAN_INPUT
+
     if [ "$CAN_INPUT" == '' ] && [[ $(($(time_precise) - TIME)) -gt 8000000 ]]
     then
         break
-    elif [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 01 >" ] || [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 03 >" ] || [ "$CAN_INPUT" == '' ]
+
+    elif [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 01 >" ] || \
+         [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 03 >" ] || \
+         [ "$CAN_INPUT" == '' ]
     then
         TIME=$(time_precise)
-        echo $CAN_INPUT
+
+        if [ "$CAN_INPUT" == '' ]
+        then
+            echo $CAN_INPUT
+        fi
+
         while true :
         do
             EDGE=$(cat /proc/interrupts | grep gpiolib)
+
             if [ "$EDGE" != "$EDGE_OLD" ]
             then
                 echo "User button pressed!"
                 EDGE_OLD=$EDGE
+
                 if [ "$MOTOR_STATE" -eq 3 ]
                 then
                     MOTOR_STATE='01'
+
                 else
                     MOTOR_STATE='03'
                 fi
