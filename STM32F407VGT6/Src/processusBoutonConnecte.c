@@ -1,6 +1,7 @@
 // processusBoutonConnecte:
 #include "main.h"
 #include "serviceBaseDeTemps.h"
+#include "interfaceT1.h"
 #include "interfaceT2.h"
 #include "interfaceT3.h"
 #include "interfaceT4.h"
@@ -22,27 +23,14 @@ typedef struct {
   unsigned char octetsATransmettre[NOMBRE_D_OCTETS_A_TRANSMETTRE];
 } protocole;
 
-void processusBoutonConnecte_changeT2(void);
 unsigned char processusBoutonConnecte_valideLesDonneesRecues(void);
 void processusBoutonConnecte_traiteLesDonneesRecues(void);
 void processusBoutonConnecte_attendUneReponse(void);
 
-unsigned char processusBoutonConnecte_etatDeT2;
 unsigned char processusBoutonConnecte_compteur;
 unsigned char processusBoutonConnecte_octetsRecus[NOMBRE_D_OCTETS_A_RECEVOIR];
 unsigned char processusBoutonConnecte_octetsATransmettre[NOMBRE_D_OCTETS_A_TRANSMETTRE];
 protocole communication;
-
-void processusBoutonConnecte_changeT2(void) {
-  if (processusBoutonConnecte_etatDeT2 == 0) {
-    processusBoutonConnecte_etatDeT2 = 1;
-    interfaceT2_allume();
-    return;
-  }
-  
-  processusBoutonConnecte_etatDeT2 = 0;
-  interfaceT2_eteint();  
-}
 
 unsigned char processusBoutonConnecte_valideLesDonneesRecues(void) {
   if ((processusBoutonConnecte_octetsRecus[0] & 0xFC) != 0x00) {
@@ -61,10 +49,12 @@ void processusBoutonConnecte_traiteLesDonneesRecues(void) {
 void processusBoutonConnecte_attendUneReponse(void) {
   if (++processusBoutonConnecte_compteur ==
       PROCESSUSBOUTONCONNECTE_COMPTE_MAXIMAL_POUR_RECEVOIR) {
+    
     processusBoutonConnecte_compteur = 0;
-    interfaceT4_allume();
+    
     serviceBaseDeTemps_execute[PROCESSUSBOUTONCONNECTE_PHASE] =
         processusBoutonConnecte_attendUneReponse;
+    
     return;
   }
   
@@ -72,14 +62,12 @@ void processusBoutonConnecte_attendUneReponse(void) {
     return;
   
   communication.information = INFORMATION_TRAITEE;
+  
   serviceBaseDeTemps_execute[PROCESSUSBOUTONCONNECTE_PHASE] =
     processusBoutonConnecte_attendUneReponse;
  
-  processusBoutonConnecte_changeT2();
-  if (communication.statut != PAS_D_ERREUR) {
-    interfaceT4_allume();
+  if (communication.statut != PAS_D_ERREUR)
     return;
-  }
   
   if (processusBoutonConnecte_valideLesDonneesRecues() == ERREUR) {
     interfaceT3_allume();
@@ -87,12 +75,11 @@ void processusBoutonConnecte_attendUneReponse(void) {
   }
   
   processusBoutonConnecte_traiteLesDonneesRecues();
-  interfaceT3_eteint();
 }
 
 void processusBoutonConnecte_initialise(void) {
   processusBoutonConnecte_compteur = 0;
-  processusBoutonConnecte_etatDeT2 = 0;
+  interfaceT1_eteint();
   interfaceT2_eteint();
   interfaceT3_eteint();
   interfaceT4_eteint();
