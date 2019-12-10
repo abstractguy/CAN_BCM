@@ -4,11 +4,13 @@
 # Comments:      This file is directly invoked using source.
 #                This prevents file descriptors from getting
 #                closed prematurely with an exiting subshell.
-# Documentation: https://github.com/linux-can/can-utils/blob/master/bcmserve$# Example usage: sudo --prompt=temppwd su -c 'source /home/debian/CAN_relay.$
+# Documentation: https://github.com/linux-can/can-utils/blob/master/bcmserver.c
+# Example usage: sudo --prompt=temppwd su -c 'source /home/debian/CAN_relay.sh' --preserve-environment
+
 # Modifiable variables.
 INTERFACE_TYPE=can
 BITRATE=50000
-DELAY_US=50000
+DELAY_US=500000
 
 # Non-modifiable variables.
 INTERFACE=$INTERFACE_TYPE'0'
@@ -18,7 +20,7 @@ GREEN_LED=/sys/class/leds/green
 RED_LED=/sys/class/leds/red
 GPIO=/sys/class/gpio
 BUTTON=$GPIO/gpio69
-MOTOR_STATE='01'
+MOTOR_STATE=0x01
 
 # Ensure kernel modules are loaded.
 modprobe can
@@ -39,7 +41,7 @@ echo 'rising' > $BUTTON/edge
 
 if [ ! -e /dev/tcp ]
 then
-    # Create character device for TCP/IP socket manipulation if it doesn't exist.
+    # Create character device for TCP/IP socket manipulation if it doesn't exist already.
     mknod /dev/tcp c 30 36
 
     # Flush firewall rules to enable multiple binding of listeners to same socket.
@@ -64,16 +66,21 @@ eval "ip link set up $INTERFACE type $INTERFACE_TYPE $BITRATE"
 # Starting CAN broadcast manager.
 bcmserver &
 PID_SERVER=$!
-sleep 0.5 # Waiting for server to boot.
+sleep 1 # Waiting for server to boot.
 
 # Linking socket to file descriptor to be used.
 exec {FILE_DESCRIPTOR}<>$SOCKET
 
 function destroy {
     # Be nice and kill all nodes.
-    echo "<${INTERFACE} U 0 0 001 1 00>" >&$FILE_DESCRIPTOR # Send power off$    sleep 0.5
+    echo "<${INTERFACE} U 0 0 001 1 00>" >&$FILE_DESCRIPTOR # Send power off command.
+    sleep 1
 
-    echo "<${INTERFACE} X 0 0 003 0 00>" >&$FILE_DESCRIPTOR # Delete receive$    echo "<${INTERFACE} X 0 0 002 0 00>" >&$FILE_DESCRIPTOR # Delete receive$    echo "<${INTERFACE} X 0 0 001 0 00>" >&$FILE_DESCRIPTOR # Delete receive$    echo "<${INTERFACE} D 0 0 001 0 00>" >&$FILE_DESCRIPTOR # Delete receive$    sleep 0.5
+    echo "<${INTERFACE} X 0 0 003 0 00>" >&$FILE_DESCRIPTOR # Delete receiver.
+    echo "<${INTERFACE} X 0 0 002 0 00>" >&$FILE_DESCRIPTOR # Delete receiver.
+    echo "<${INTERFACE} X 0 0 001 0 00>" >&$FILE_DESCRIPTOR # Delete receiver.
+    echo "<${INTERFACE} D 0 0 001 0 00>" >&$FILE_DESCRIPTOR # Delete receiver.
+    sleep 1
 
     # Kill server.
     kill $PID_SERVER
@@ -101,14 +108,15 @@ trap destroy SIGHUP
 
 # Send commands to server through file descriptor to socket:
 
-# < INTERFACE ADD_CYCLE DELAY_SEC DELAY_US HEX_ADDRESS N_BYTES SPACE_SEPARAT$echo "<${INTERFACE} A 0 ${DELAY_US} 001 1 01>" >&$FILE_DESCRIPTOR
-sleep 0.5
+# < INTERFACE ADD_CYCLE DELAY_SEC DELAY_US HEX_ADDRESS N_BYTES SPACE_SEPARATED_HEX_BYTES >
+echo "<${INTERFACE} A 0 ${DELAY_US} 001 1 01>" >&$FILE_DESCRIPTOR
+sleep 1
 
 # < INTERFACE RECEIVE_FROM DELAY_SEC DELAY_US HEX_ADDRESS N_BYTES FILTER >
 echo "<${INTERFACE} R 0 0 001 1 FF>" >&$FILE_DESCRIPTOR
 echo "<${INTERFACE} R 0 0 002 1 FF>" >&$FILE_DESCRIPTOR
 echo "<${INTERFACE} R 0 0 003 1 FF>" >&$FILE_DESCRIPTOR
-sleep 0.5
+sleep 1
 
 function time_precise {
     echo $(($(date +%s%N) / 1000))
@@ -134,7 +142,7 @@ do
     fi
 
     # Read from standard input with 8 second timeout.
-    read -t 7 -r SYNC
+    read -t 8 -r SYNC
 
     if [[ $? -gt 128 ]]
     then
