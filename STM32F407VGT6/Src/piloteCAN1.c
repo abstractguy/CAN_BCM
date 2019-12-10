@@ -2,16 +2,13 @@
 #include "main.h"
 #include "piloteCAN1.h"
 
-//Declarations de variables privees:
-extern CAN_HandleTypeDef hcan1; //défini par le hal dans main
+extern CAN_HandleTypeDef hcan1; // Defini par le HAL dans main.
 
-//Definitions de variables privees:
 CAN_RxHeaderTypeDef piloteCAN1_reception;
 CAN_TxHeaderTypeDef piloteCAN1_transmission;
 CAN_FilterTypeDef piloteCAN1_filtre;
 unsigned int piloteCAN1_CasierPostal;
 
-//Fonctions publiques:
 unsigned int piloteCAN1_messageDisponible(void) {
   return HAL_CAN_GetRxFifoFillLevel(&hcan1, CAN_FILTER_FIFO0);  
 }
@@ -21,8 +18,11 @@ unsigned int piloteCAN1_messageTransmis(void) {
 }
 
 unsigned char piloteCAN1_litUnMessageRecu(unsigned char *DonneesRecues) {
-  if (HAL_CAN_GetRxMessage(&hcan1, CAN_FILTER_FIFO0,
-                           &piloteCAN1_reception, DonneesRecues) != HAL_OK) {
+  if (HAL_CAN_GetRxMessage(&hcan1, 
+                           CAN_FILTER_FIFO0,
+                           &piloteCAN1_reception, 
+                           DonneesRecues) != HAL_OK) {
+                             
     return PILOTECAN1_PAS_DISPONIBLE;
   } else {
     return PILOTECAN1_DISPONIBLE;
@@ -32,10 +32,15 @@ unsigned char piloteCAN1_litUnMessageRecu(unsigned char *DonneesRecues) {
 unsigned int piloteCAN1_transmetDesDonnes(unsigned int Identification11Bits,
                                           unsigned char *Donnees,
                                           unsigned char Nombre) {
-  piloteCAN1_transmission.StdId = Identification11Bits; // << 5;
+                                            
+  piloteCAN1_transmission.StdId = Identification11Bits;
   piloteCAN1_transmission.DLC = Nombre;
-  if (HAL_CAN_AddTxMessage(&hcan1, &piloteCAN1_transmission,
-                           Donnees, &piloteCAN1_CasierPostal) != HAL_OK) {
+  
+  if (HAL_CAN_AddTxMessage(&hcan1, 
+                           &piloteCAN1_transmission,
+                           Donnees, 
+                           &piloteCAN1_CasierPostal) != HAL_OK) {
+                             
     return PILOTECAN1_PAS_TRANSMIS;
   } else {
     return PILOTECAN1_TRANSMIS;
@@ -48,9 +53,9 @@ unsigned int piloteCAN1_initialise(void) {
   piloteCAN1_transmission.RTR = CAN_RTR_DATA;
   piloteCAN1_transmission.TransmitGlobalTime = DISABLE;
   
-  piloteCAN1_filtre.FilterIdHigh = PILOTECAN1_IDENTIFICATION_EN_RECEPTION ;// << 5;
+  piloteCAN1_filtre.FilterIdHigh = PILOTECAN1_IDENTIFICATION_EN_RECEPTION;
   piloteCAN1_filtre.FilterIdLow = 0xFF;
-  piloteCAN1_filtre.FilterMaskIdHigh = PILOTECAN1_MASQUE_11_BITS_EN_RECEPTION ;//<< 21;
+  piloteCAN1_filtre.FilterMaskIdHigh = PILOTECAN1_MASQUE_11_BITS_EN_RECEPTION;
   piloteCAN1_filtre.FilterMaskIdLow = 0xFF;
   piloteCAN1_filtre.FilterFIFOAssignment = CAN_FILTER_FIFO0;
   piloteCAN1_filtre.FilterBank = 13;

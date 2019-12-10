@@ -3,7 +3,6 @@
 #include "piloteIOT4.h"
 #include "interfaceT4.h"
 
-//Definitions de fonctions publiques:
 void interfaceT4_allume(void) {
   piloteIOT4_metLaSortieA(INTERFACET4_VALEUR_POUR_ALLUMER);
 }

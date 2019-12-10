@@ -1,10 +1,8 @@
 // interfaceT2:
-//INCLUSIONS
 #include "main.h"
 #include "piloteIOT2.h"
 #include "interfaceT2.h"
 
-//Definitions de fonctions publiques:
 void interfaceT2_allume(void) {
   piloteIOT2_metLaSortieA(INTERFACET2_VALEUR_POUR_ALLUMER);
 }
