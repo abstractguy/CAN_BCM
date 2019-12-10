@@ -122,7 +122,9 @@ do
     if [ "$CAN_INPUT" == '' ] && [[ $(($(time_precise) - TIME)) -gt 570000 ]]
     then
         break
-    elif [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 01 >" ] || [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 03 >" ] || [ "$CAN_INPUT" ==$
+    elif [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 01 >" ] || \
+         [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 03 >" ] || \
+         [ "$CAN_INPUT" == '' ]
     then
         echo $CAN_INPUT
         TIME=$(time_precise)
