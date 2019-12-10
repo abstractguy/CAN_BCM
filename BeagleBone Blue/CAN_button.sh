@@ -10,7 +10,7 @@
 # Modifiable variables.
 INTERFACE_TYPE=can
 BITRATE=50000
-DELAY_US=50000
+DELAY_US=500000
 
 # Non-modifiable variables.
 INTERFACE=$INTERFACE_TYPE'0'
@@ -73,7 +73,7 @@ exec {FILE_DESCRIPTOR}<>$SOCKET
 
 function destroy {
     echo "<${INTERFACE} X 0 0 001 0 00>" >&$FILE_DESCRIPTOR # Delete receiver.
-    sleep 0.5
+    sleep 1
 
     # Kill server.
     kill $PID_SERVER
@@ -103,7 +103,7 @@ trap destroy SIGHUP
 
 # < INTERFACE RECEIVE_FROM DELAY_SEC DELAY_US HEX_ADDRESS N_BYTES FILTER >
 echo "<${INTERFACE} R 0 0 001 1 FF>" >&$FILE_DESCRIPTOR
-sleep 0.5
+sleep 1
 
 function time_precise {
     echo $(($(date +%s%N) / 1000))
@@ -117,17 +117,14 @@ sleep 5
 while true :
 do
     # Read server output from file descriptor.
-    read -t 0.004 -d '' -u $FILE_DESCRIPTOR -r CAN_INPUT
-
-    if [ "$CAN_INPUT" == '' ] && [[ $(($(time_precise) - TIME)) -gt 570000 ]]
+    read -t 0.001 -d '' -u $FILE_DESCRIPTOR -r CAN_INPUT
+    if [ "$CAN_INPUT" == '' ] && [[ $(($(time_precise) - TIME)) -gt 8000000 ]]
     then
         break
-    elif [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 01 >" ] || \
-         [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 03 >" ] || \
-         [ "$CAN_INPUT" == '' ]
+    elif [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 01 >" ] || [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 03 >" ] || [ "$CAN_INPUT" == '' ]
     then
-        echo $CAN_INPUT
         TIME=$(time_precise)
+        echo $CAN_INPUT
         while true :
         do
             EDGE=$(cat /proc/interrupts | grep gpiolib)
@@ -145,7 +142,7 @@ do
                 echo 'Motor state: '$MOTOR_STATE
             fi
 
-            if [[ $(($(time_precise) - TIME)) -gt 30000 ]]
+            if [[ $(($(time_precise) - TIME)) -gt 3300 ]]
             then
                 break
             else
@@ -163,6 +160,8 @@ do
         echo "Ill command received!"
         break
     fi
+
+    echo "$CAN_INPUT"
 done
 
 destroy
