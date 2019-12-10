@@ -39,9 +39,11 @@ echo 'rising' > $BUTTON/edge
 
 if [ ! -e /dev/tcp ]
 then
-    # Create character device for TCP/IP socket manipulation if it doesn't e$    mknod /dev/tcp c 30 36
+    # Create character device for TCP/IP socket manipulation if it doesn't exist.
+    mknod /dev/tcp c 30 36
 
-    # Flush firewall rules to enable multiple binding of listeners to same s$    iptables -F
+    # Flush firewall rules to enable multiple binding of listeners to same socket.
+    iptables -F
 fi
 
 # Virtual CAN interface has no bitrate.
