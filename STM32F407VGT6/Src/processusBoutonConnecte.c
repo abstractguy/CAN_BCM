@@ -1,8 +1,4 @@
-//processusBoutonConnecte:
-//Historique: 
-// 2018-10-28, Yves Roy, creation
-
-//INCLUSIONS
+// processusBoutonConnecte:
 #include "main.h"
 #include "serviceBaseDeTemps.h"
 #include "interfaceT2.h"
@@ -99,9 +95,6 @@ void processusBoutonConnecte_attendUneReponse(void) {
   processusBoutonConnecte_traiteLesDonneesRecues();
   interfaceT3_eteint();
 }
-
-//Definitions de variables publiques:
-//pas de variables publiques
 
 //Definitions de fonctions publiques:
 void processusBoutonConnecte_initialise(void) {

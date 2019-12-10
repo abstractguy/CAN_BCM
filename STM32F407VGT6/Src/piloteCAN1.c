@@ -1,16 +1,6 @@
-//piloteCAN1:
-//Historique: 
-// 2018-11-12, Yves Roy, creation
-
-//INCLUSIONS
+// piloteCAN1:
 #include "main.h"
 #include "piloteCAN1.h"
-
-//Definitions privees
-//pas de definitions privees
-
-//Declarations de fonctions privees:
-//pas de fonctions privees
 
 //Declarations de variables privees:
 extern CAN_HandleTypeDef hcan1; //défini par le hal dans main
@@ -20,15 +10,6 @@ CAN_RxHeaderTypeDef piloteCAN1_reception;
 CAN_TxHeaderTypeDef piloteCAN1_transmission;
 CAN_FilterTypeDef piloteCAN1_filtre;
 unsigned int piloteCAN1_CasierPostal;
-
-//Definitions de fonctions privees:
-//pas de fonctions privees
-
-//Definitions de variables publiques:
-// pas de variables publiques
-
-//Definitions de fonctions publiques:
-// pas de definitions publiques
 
 //Fonctions publiques:
 unsigned int piloteCAN1_messageDisponible(void) {

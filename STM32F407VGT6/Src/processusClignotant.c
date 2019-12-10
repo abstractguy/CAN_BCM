@@ -1,8 +1,4 @@
-//processusClignotant:
-//Historique: 
-// 2019-10-27, Yves Roy, creation
-
-//INCLUSIONS
+// processusClignotant:
 #include "main.h"
 #include "piloteCAN1.h"
 #include "serviceBaseDeTemps.h"
@@ -48,8 +44,7 @@ void processusClignotant_eteintUnPeu(void) {
                                1);
 }
 
-void processusClignotant_allumeUnPeu(void)
-{
+void processusClignotant_allumeUnPeu(void) {
   processusClignotant_compteur++;
   if (processusClignotant_compteur < PROCESSUSCLIGNOTANT_COMPTE_COURT_ALLUME)
     return;
@@ -65,8 +60,7 @@ void processusClignotant_allumeUnPeu(void)
       processusClignotant_eteintLongtemps;  
 }
 
-void processusClignotant_eteintLongtemps(void)
-{
+void processusClignotant_eteintLongtemps(void) {
   processusClignotant_compteur++;
   if (processusClignotant_compteur < PROCESSUSCLIGNOTANT_COMPTE_LONG_ETEINT)
     return;
@@ -75,8 +69,7 @@ void processusClignotant_eteintLongtemps(void)
       processusClignotant_allumeLongtemps;
 }
 
-void processusClignotant_allumeLongtemps(void)
-{
+void processusClignotant_allumeLongtemps(void) {
   processusClignotant_compteur++;
   if (processusClignotant_compteur < PROCESSUSCLIGNOTANT_COMPTE_LONG_ALLUME)
     return;
@@ -85,12 +78,8 @@ void processusClignotant_allumeLongtemps(void)
       processusClignotant_eteintUnPeu;  
 }
 
-//Definitions de variables publiques:
-//pas de variables publiques
-
 //Definitions de fonctions publiques:
 void processusClignotant_initialise(void) {
-  //processusClignotant_donneesATransmettre[0] = 0x01;
   processusClignotant_compteur = 0;
   serviceBaseDeTemps_execute[PROCESSUSCLIGNOTANT_PHASE] =
       processusClignotant_eteintUnPeu;

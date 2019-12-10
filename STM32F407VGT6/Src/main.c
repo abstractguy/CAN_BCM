@@ -23,10 +23,6 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-//S-0010:
-//Historique: 
-// 2019-10-27, Yves Roy, creation
-
 //notes sur l'utilisation des timers.
 // https://www.st.com/content/ccc/resource/technical/document/application_note/group0/91/01/84/3f/7c/67/41/3f/DM00236305/files/DM00236305.pdf/jcr:content/translations/en.DM00236305.pdf
 //https://stm32f4-discovery.net/2014/05/stm32f4-stm32f429-discovery-pwm-tutorial/
@@ -35,7 +31,6 @@
 //default_frequency = 84MHz compte tenu des options choisies avec le "cube"
 //TIM_Period = timer_tick_frequency / TIM_frequency - 1
 //il faut s'assurer que le compte pour la periode est plus petit que 65536
-
 #include "piloteTimer6Up.h"
 #include "piloteCAN1.h"
 #include "piloteIOT1.h"
@@ -69,10 +64,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 CAN_HandleTypeDef hcan1;
-
 TIM_HandleTypeDef htim6;
-
-UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
@@ -92,10 +84,8 @@ void main_initialiseApresLeHAL(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-void main_initialiseAvantLeHAL(void)
-{
+void main_initialiseAvantLeHAL(void) {
   piloteTimer6Up_initialise();
-  //piloteCAN1_initialise(); //irait ici en temps normal... mais il y a un bug dans le cube
   piloteIOT1_initialise();
   piloteIOT2_initialise();
   piloteIOT3_initialise();
@@ -109,23 +99,19 @@ void main_initialiseAvantLeHAL(void)
   processusBoutonConnecte_initialise();
 }
 
-void main_initialiseApresLeHAL(void)
-{
+void main_initialiseApresLeHAL(void) {
   piloteCAN1_initialise();
   piloteTimer6Up_permetLesInterruptions();
 }
 
-void neFaitRien(void)
-{
-}
+void neFaitRien(void) {}
 /* USER CODE END 0 */
 
 /**
   * @brief  The application entry point.
   * @retval int
   */
-int main(void)
-{
+int main(void) {
   /* USER CODE BEGIN 1 */
   main_initialiseAvantLeHAL();
   /* USER CODE END 1 */
@@ -172,8 +158,7 @@ int main(void)
   * @brief System Clock Configuration
   * @retval None
   */
-void SystemClock_Config(void)
-{
+void SystemClock_Config(void) {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
@@ -191,8 +176,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLN = 168;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
   RCC_OscInitStruct.PLL.PLLQ = 7;
-  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
-  {
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK) {
     Error_Handler();
   }
   /** Initializes the CPU, AHB and APB busses clocks 
@@ -204,8 +188,7 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
-  {
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK) {
     Error_Handler();
   }
 }
@@ -215,9 +198,7 @@ void SystemClock_Config(void)
   * @param None
   * @retval None
   */
-static void MX_CAN1_Init(void)
-{
-
+static void MX_CAN1_Init(void) {
   /* USER CODE BEGIN CAN1_Init 0 */
 
   /* USER CODE END CAN1_Init 0 */
@@ -238,8 +219,7 @@ static void MX_CAN1_Init(void)
   hcan1.Init.AutoRetransmission = DISABLE;
   hcan1.Init.ReceiveFifoLocked = DISABLE;
   hcan1.Init.TransmitFifoPriority = DISABLE;
-  if (HAL_CAN_Init(&hcan1) != HAL_OK)
-  {
+  if (HAL_CAN_Init(&hcan1) != HAL_OK) {
     Error_Handler();
   }
   /* USER CODE BEGIN CAN1_Init 2 */
@@ -253,9 +233,7 @@ static void MX_CAN1_Init(void)
   * @param None
   * @retval None
   */
-static void MX_TIM6_Init(void)
-{
-
+static void MX_TIM6_Init(void) {
   /* USER CODE BEGIN TIM6_Init 0 */
 
   /* USER CODE END TIM6_Init 0 */
@@ -270,14 +248,12 @@ static void MX_TIM6_Init(void)
   htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim6.Init.Period = PILOTETIMER6UP_COMPTE_MAXIMAL;
   htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_Base_Init(&htim6) != HAL_OK)
-  {
+  if (HAL_TIM_Base_Init(&htim6) != HAL_OK) {
     Error_Handler();
   }
   sMasterConfig.MasterOutputTrigger = TIM_TRGO_ENABLE;
   sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim6, &sMasterConfig) != HAL_OK)
-  {
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim6, &sMasterConfig) != HAL_OK) {
     Error_Handler();
   }
   /* USER CODE BEGIN TIM6_Init 2 */
@@ -291,8 +267,7 @@ static void MX_TIM6_Init(void)
   * @param None
   * @retval None
   */
-static void MX_GPIO_Init(void)
-{
+static void MX_GPIO_Init(void) {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   /* GPIO Ports Clock Enable */
@@ -421,7 +396,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_EVT_RISING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(MEMS_INT2_GPIO_Port, &GPIO_InitStruct);
-
 }
 
 /* USER CODE BEGIN 4 */
@@ -432,13 +406,10 @@ static void MX_GPIO_Init(void)
   * @brief  This function is executed in case of error occurrence.
   * @retval None
   */
-void Error_Handler(void)
-{
+void Error_Handler(void) {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
-  while(1) 
-  {
-  }
+  while(1) {}
   /* USER CODE END Error_Handler_Debug */
 }
 
@@ -450,8 +421,7 @@ void Error_Handler(void)
   * @param  line: assert_param error line source number
   * @retval None
   */
-void assert_failed(uint8_t *file, uint32_t line)
-{ 
+void assert_failed(uint8_t *file, uint32_t line) {
   /* USER CODE BEGIN 6 */
   /* User can add his own implementation to report the file name and line number,
     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
