@@ -107,8 +107,8 @@ EDGE_OLD=$(cat /proc/interrupts | grep gpiolib)
 # Leave time to setup other devices.
 sleep 8
 
-TIME=$(time_precise)
-
+#TIME=$(time_precise)
+#
 ## Main loop.
 #while true :
 #do
@@ -123,13 +123,7 @@ TIME=$(time_precise)
 #    if [[ $(($(time_precise) - TIME)) -gt 3300 ]]
 #    then
 #        TIME=$(time_precise)
-#        echo "<${INTERFACE} S 0 0 003 1 ${MOTOR_STATE}>" >&$FILE_DESCRIPTOR
-#
-#    elif [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 01 >" ] || \
-#         [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 03 >" ] || \
-#         [ "$CAN_INPUT" == '' ]
-#    then
-#        EDGE=$(cat /proc/interrupts | grep gpiolib)
+#		EDGE=$(cat /proc/interrupts | grep gpiolib)
 #
 #        if [ "$EDGE" != "$EDGE_OLD" ]
 #        then
@@ -146,6 +140,14 @@ TIME=$(time_precise)
 #
 #            echo 'Motor state: '$MOTOR_STATE
 #        fi
+#		
+#        echo "<${INTERFACE} S 0 0 003 1 ${MOTOR_STATE}>" >&$FILE_DESCRIPTOR
+#
+#    elif [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 01 >" ] || \
+#         [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 03 >" ] || \
+#         [ "$CAN_INPUT" == '' ]
+#    then
+#        continue
 #
 #    elif [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 00 >" ]
 #    then
@@ -170,9 +172,12 @@ do
         echo $CAN_INPUT
     fi
 
-    if [[ $(($(time_precise) - TIME)) -gt 3300 ]]
+    if [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 01 >" ] || \
+         [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 03 >" ] || \
+         [ "$CAN_INPUT" == '' ]
     then
-        TIME=$(time_precise)
+        sleep 0.033
+
 		EDGE=$(cat /proc/interrupts | grep gpiolib)
 
         if [ "$EDGE" != "$EDGE_OLD" ]
@@ -190,14 +195,8 @@ do
 
             echo 'Motor state: '$MOTOR_STATE
         fi
-		
-        echo "<${INTERFACE} S 0 0 003 1 ${MOTOR_STATE}>" >&$FILE_DESCRIPTOR
 
-    elif [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 01 >" ] || \
-         [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 03 >" ] || \
-         [ "$CAN_INPUT" == '' ]
-    then
-        continue
+        echo "<${INTERFACE} S 0 0 003 1 ${MOTOR_STATE}>" >&$FILE_DESCRIPTOR
 
     elif [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 00 >" ]
     then
