@@ -125,13 +125,13 @@ do
 
     if [[ $(($(time_precise) - TIME)) -gt 3300 ]]
     then
+        TIME=$(time_precise)
         echo "<${INTERFACE} S 0 0 003 1 ${MOTOR_STATE}>" >&$FILE_DESCRIPTOR
 
     elif [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 01 >" ] || \
          [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 03 >" ] || \
          [ "$CAN_INPUT" == '' ]
     then
-        TIME=$(time_precise)
         EDGE=$(cat /proc/interrupts | grep gpiolib)
 
         if [ "$EDGE" != "$EDGE_OLD" ]
