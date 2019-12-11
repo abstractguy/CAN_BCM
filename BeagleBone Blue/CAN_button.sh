@@ -10,7 +10,6 @@
 # Modifiable variables.
 INTERFACE_TYPE=can
 BITRATE=50000
-DELAY_US=100000
 
 # Non-modifiable variables.
 INTERFACE=$INTERFACE_TYPE'0'
