@@ -110,67 +110,56 @@ EDGE_OLD=$(cat /proc/interrupts | grep gpiolib)
 
 sleep 5
 
+TIME=$(time_precise)
+
 # Main loop.
 while true :
 do
     # Read server output from file descriptor.
     read -t 0.001 -d '' -u $FILE_DESCRIPTOR -r CAN_INPUT
 
-    if [ "$CAN_INPUT" == '' ] && [[ $(($(time_precise) - TIME)) -gt 8000000 ]]
+    if [[ $(($(time_precise) - TIME)) -gt 3300 ]]
     then
-        break
+        echo "<${INTERFACE} S 0 0 003 1 ${MOTOR_STATE}>" >&$FILE_DESCRIPTOR
 
     elif [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 01 >" ] || \
          [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 03 >" ] || \
          [ "$CAN_INPUT" == '' ]
     then
-        TIME=$(time_precise)
-
-        if [ "$CAN_INPUT" == '' ]
+        if [ "$CAN_INPUT" != '' ]
         then
             echo $CAN_INPUT
         fi
 
-        while true :
-        do
-            EDGE=$(cat /proc/interrupts | grep gpiolib)
+        TIME=$(time_precise)
+        EDGE=$(cat /proc/interrupts | grep gpiolib)
 
-            if [ "$EDGE" != "$EDGE_OLD" ]
+        if [ "$EDGE" != "$EDGE_OLD" ]
+        then
+            echo "User button pressed!"
+            EDGE_OLD=$EDGE
+
+            if [ "$MOTOR_STATE" == '01' ]
             then
-                echo "User button pressed!"
-                EDGE_OLD=$EDGE
+                MOTOR_STATE='01'
 
-                if [ "$MOTOR_STATE" -eq 3 ]
-                then
-                    MOTOR_STATE='01'
-
-                else
-                    MOTOR_STATE='03'
-                fi
-
-                echo 'Motor state: '$MOTOR_STATE
-            fi
-
-            if [[ $(($(time_precise) - TIME)) -gt 3300 ]]
-            then
-                break
             else
-                continue
+                MOTOR_STATE='03'
             fi
-        done
 
-        echo "<${INTERFACE} S 0 0 003 1 ${MOTOR_STATE}>" >&$FILE_DESCRIPTOR
+            echo 'Motor state: '$MOTOR_STATE
+        fi
 
     elif [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 00 >" ]
     then
         echo "Power down command received!"
         break
+
     else
         echo "Ill command received!"
         break
     fi
 
-    echo "$CAN_INPUT"
 done
 
 destroy
