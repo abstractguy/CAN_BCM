@@ -10,7 +10,7 @@
 # Modifiable variables.
 INTERFACE_TYPE=can
 BITRATE=50000
-DELAY_US=100000
+DELAY_US=200000
 
 # Non-modifiable variables.
 INTERFACE=$INTERFACE_TYPE'0'
@@ -127,7 +127,7 @@ do
 
     # Read from standard input with 8 second timeout.
     read -t 8 -r SYNC
-
+    
     if [[ $? -gt 128 ]]
     then
         echo "SYNC timeout!"
