@@ -18,6 +18,7 @@ BITRATE='bitrate '$BITRATE
 SOCKET=/dev/tcp/127.0.0.1/28600
 GREEN_LED=/sys/class/leds/green
 RED_LED=/sys/class/leds/red
+MOTOR_STATE='01'
 
 # Ensure kernel modules are loaded.
 modprobe vcan
@@ -110,11 +111,16 @@ do
       echo "$CAN_INPUT"
     fi
 
-    if [ "$CAN_INPUT" == "< ${INTERFACE} R 0 0 003 1 03 >" ]
+    if [ "$CAN_INPUT" == "< ${INTERFACE} 003 1 03 >" ] && \
+       [ "$MOTOR_STATE" == '01' ]
     then
+        MOTOR_STATE='03'
         echo "<${INTERFACE} U 0 ${DELAY_US} 001 1 03>" >&$FILE_DESCRIPTOR
 
-    else
+    if [ "$CAN_INPUT" == "< ${INTERFACE} 003 1 01 >" ] && \
+       [ "$MOTOR_STATE" == '03' ]
+    then
+        MOTOR_STATE='01'
         echo "<${INTERFACE} U 0 ${DELAY_US} 001 1 01>" >&$FILE_DESCRIPTOR
     fi
 
