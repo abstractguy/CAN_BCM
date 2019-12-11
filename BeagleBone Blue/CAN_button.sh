@@ -115,12 +115,12 @@ do
     fi
 
     if [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 01 >" ] || \
-         [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 03 >" ] || \
-         [ "$CAN_INPUT" == '' ]
+       [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 03 >" ] || \
+       [ "$CAN_INPUT" == '' ]
     then
-        sleep 0.033
+        sleep 0.05
 
-		EDGE=$(cat /proc/interrupts | grep gpiolib)
+        EDGE=$(cat /proc/interrupts | grep gpiolib)
 
         if [ "$EDGE" != "$EDGE_OLD" ]
         then
@@ -130,15 +130,15 @@ do
             if [ "$MOTOR_STATE" == '03' ]
             then
                 MOTOR_STATE='01'
+                echo "<${INTERFACE} S 0 0 003 1 01>" >&$FILE_DESCRIPTOR
+                echo 'Motor state: 01'
 
             else
                 MOTOR_STATE='03'
+                echo "<${INTERFACE} S 0 0 003 1 03>" >&$FILE_DESCRIPTOR
+                echo 'Motor state: 03'
             fi
-
-            echo 'Motor state: '$MOTOR_STATE
         fi
-
-        echo "<${INTERFACE} S 0 0 003 1 ${MOTOR_STATE}>" >&$FILE_DESCRIPTOR
 
     elif [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 00 >" ]
     then
