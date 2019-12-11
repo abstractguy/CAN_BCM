@@ -140,7 +140,7 @@ do
             echo "User button pressed!"
             EDGE_OLD=$EDGE
 
-            if [ "$MOTOR_STATE" == '01' ]
+            if [ "$MOTOR_STATE" == '03' ]
             then
                 MOTOR_STATE='01'
 
