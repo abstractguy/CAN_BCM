@@ -118,6 +118,11 @@ do
     # Read server output from file descriptor.
     read -t 0.001 -d '' -u $FILE_DESCRIPTOR -r CAN_INPUT
 
+    if [ "$CAN_INPUT" != '' ]
+    then
+        echo $CAN_INPUT
+    fi
+
     if [[ $(($(time_precise) - TIME)) -gt 3300 ]]
     then
         echo "<${INTERFACE} S 0 0 003 1 ${MOTOR_STATE}>" >&$FILE_DESCRIPTOR
@@ -126,11 +131,6 @@ do
          [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 03 >" ] || \
          [ "$CAN_INPUT" == '' ]
     then
-        if [ "$CAN_INPUT" != '' ]
-        then
-            echo $CAN_INPUT
-        fi
-
         TIME=$(time_precise)
         EDGE=$(cat /proc/interrupts | grep gpiolib)
 
