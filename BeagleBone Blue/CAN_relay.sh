@@ -116,6 +116,7 @@ do
     then
         MOTOR_STATE='03'
         echo "<${INTERFACE} U 0 ${DELAY_US} 001 1 03>" >&$FILE_DESCRIPTOR
+    fi
 
     if [ "$CAN_INPUT" == "< ${INTERFACE} 003 1 01 >" ] && \
        [ "$MOTOR_STATE" == '03' ]
