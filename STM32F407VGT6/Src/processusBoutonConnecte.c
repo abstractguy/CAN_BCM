@@ -79,10 +79,6 @@ void processusBoutonConnecte_attendUneReponse(void) {
 
 void processusBoutonConnecte_initialise(void) {
   processusBoutonConnecte_compteur = 0;
-  interfaceT1_eteint();
-  interfaceT2_eteint();
-  interfaceT3_eteint();
-  interfaceT4_eteint();
   
   serviceBaseDeTemps_execute[PROCESSUSBOUTONCONNECTE_PHASE] =
       processusBoutonConnecte_attendUneReponse;

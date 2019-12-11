@@ -126,8 +126,6 @@
   #define MEMS_INT2_GPIO_Port GPIOE
   /* USER CODE BEGIN Private defines */
   
-  //DEFINITIONS REQUISES PAR LE PROGRAMME:
-  //Dépendances matérielles:
   #define FREQUENCE_D_OSCILLATEUR_EN_KHZ  84000.0
   #define PILOTEIOT1_PORT  LD6_GPIO_Port
   #define PILOTEIOT1_SORTIE  LD6_Pin
@@ -137,11 +135,6 @@
   #define PILOTEIOT3_SORTIE  LD4_Pin
   #define PILOTEIOT4_PORT LD5_GPIO_Port
   #define PILOTEIOT4_SORTIE  LD5_Pin
-  #define PILOTEIOB1_PORT B1_GPIO_Port
-  #define PILOTEIOB1_ENTREE  B1_Pin    
-  #define INTERFACEB1_VALEUR_LUE_SI_APPUYE  1   
-  #define INTERFACEB1_VALEUR_LUE_SI_RELACHE 0
-  #define INTERFACEB1_DELAI_ANTI_REBOND_EN_MS  15
   #define INTERFACET1_VALEUR_POUR_ALLUMER  1   
   #define INTERFACET1_VALEUR_POUR_ETEINDRE 0 
   #define INTERFACET2_VALEUR_POUR_ALLUMER  1   
@@ -151,30 +144,24 @@
   #define INTERFACET4_VALEUR_POUR_ALLUMER  1   
   #define INTERFACET4_VALEUR_POUR_ETEINDRE 0 
   
-  //Dépendances logicielles:
   #define FREQUENCE_DE_LA_BASE_DE_TEMPS_EN_HZ 2000.0
-  #define PILOTETIMER1MODE2_TAUX_DE_BITS 19200.0
   #define PILOTETIMER6UP_COMPTE_MAXIMAL  (\
     (unsigned int)((FREQUENCE_D_OSCILLATEUR_EN_KHZ \
-    /FREQUENCE_DE_LA_BASE_DE_TEMPS_EN_HZ * 1000.0)-1.0))
+    /FREQUENCE_DE_LA_BASE_DE_TEMPS_EN_HZ * 1000.0) - 1.0))
   
   #define PILOTECAN1_IDENTIFICATION_EN_TRANSMISSION (0x002)
   #define PILOTECAN1_IDENTIFICATION_EN_RECEPTION (0x002)
-  #define PILOTECAN1_MASQUE_11_BITS_EN_RECEPTION  (0x0) //0x000
+  #define PILOTECAN1_MASQUE_11_BITS_EN_RECEPTION  (0xFF)
   #define PROCESSUSCLIGNOTANT_TEMPS_COURT_ETEINT_EN_MS  300
   #define PROCESSUSCLIGNOTANT_TEMPS_COURT_ALLUME_EN_MS  200
   #define PROCESSUSCLIGNOTANT_TEMPS_LONG_ETEINT_EN_MS  500
   #define PROCESSUSCLIGNOTANT_TEMPS_LONG_ALLUME_EN_MS  1000
   #define PROCESSUSBOUTONCONNECTE_TEMPS_MAXIMAL_POUR_RECEVOIR_EN_MS 100
   
-  #define SERVICEBASEDETEMPS_NOMBRE_DE_PHASES  5
+  #define SERVICEBASEDETEMPS_NOMBRE_DE_PHASES 2
   #define PROCESSUSCLIGNOTANT_PHASE 0
   #define PROCESSUSBOUTONCONNECTE_PHASE 1
-  #define INTERFACES0008_PHASE_RECEPTION 2
-  #define INTERFACES0008_PHASE_TRANSMISSION 3
   
-  //INFORMATION PUBLIQUE:
-  //Definitions publiques:
   #define INFORMATION_DISPONIBLE  1
   #define INFORMATION_TRAITEE  0
   #define REQUETE_ACTIVE  1
@@ -182,14 +169,11 @@
   #define MODULE_EN_FONCTION 1
   #define MODULE_PAS_EN_FONCTION 0
   
-  //Fonctions publiques:
   void neFaitRien(void);
   
-  //Variables publiques:
-  //copiez et adaptes les lignes qui suivent dans les fichiers .h des modules
-  //qui utilisent ces variables qui sont definies par htim6
-  //extern TIM_HandleTypeDef htim6;
-  //extern UART_HandleTypeDef huart2;
+  // Copiez et adaptes les lignes qui suivent dans les fichiers .h des modules
+  // qui utilisent ces variables qui sont definies par htim6.
+  // extern TIM_HandleTypeDef htim6;
   
   /* USER CODE END Private defines */
   

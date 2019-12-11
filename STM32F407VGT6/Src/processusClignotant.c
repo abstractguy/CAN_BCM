@@ -3,9 +3,11 @@
 #include "piloteCAN1.h"
 #include "serviceBaseDeTemps.h"
 #include "interfaceT1.h"
+#include "interfaceT2.h"
+#include "interfaceT3.h"
+#include "interfaceT4.h"
 #include "processusClignotant.h"
 
-//Definitions privees
 #define PROCESSUSCLIGNOTANT_COMPTE_COURT_ETEINT (\
   PROCESSUSCLIGNOTANT_TEMPS_COURT_ETEINT_EN_MS \
   * FREQUENCE_DE_LA_BASE_DE_TEMPS_EN_HZ \
@@ -23,18 +25,15 @@
   * FREQUENCE_DE_LA_BASE_DE_TEMPS_EN_HZ \
   / 1000.0)
 
-//Declarations de fonctions privees:
 void processusClignotant_eteintUnPeu(void);
 void processusClignotant_allumeUnPeu(void);
 void processusClignotant_eteintLongtemps(void);
 void processusClignotant_allumeLongtemps(void);
 
-//Definitions de variables privees:
 unsigned int processusClignotant_compteur;
 unsigned char processusClignotant_donneesRecues[8];  
 unsigned char processusClignotant_donneesATransmettre[8];
 
-//Definitions de fonctions privees:
 void processusClignotant_eteintUnPeu(void) {
   if (++processusClignotant_compteur < PROCESSUSCLIGNOTANT_COMPTE_COURT_ETEINT)
     return;
@@ -57,8 +56,17 @@ void processusClignotant_allumeUnPeu(void) {
   
   processusClignotant_compteur = 0;
 
-  if (processusClignotant_donneesRecues[0] == 0x03) interfaceT1_allume();
-  else interfaceT1_eteint();
+  if (processusClignotant_donneesRecues[0] == 0x03) {
+    interfaceT1_allume();
+    interfaceT2_allume();
+    interfaceT3_allume();
+    interfaceT4_allume();
+  } else {
+    interfaceT1_eteint();
+    interfaceT2_eteint();
+    interfaceT3_eteint();
+    interfaceT4_eteint();
+  }
 
   serviceBaseDeTemps_execute[PROCESSUSCLIGNOTANT_PHASE] =
       processusClignotant_eteintLongtemps;  
