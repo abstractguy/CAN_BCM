@@ -109,6 +109,56 @@ sleep 8
 
 TIME=$(time_precise)
 
+## Main loop.
+#while true :
+#do
+#    # Read server output from file descriptor.
+#    read -t 0.001 -d '' -u $FILE_DESCRIPTOR -r CAN_INPUT
+#
+#    if [ "$CAN_INPUT" != '' ]
+#    then
+#        echo $CAN_INPUT
+#    fi
+#
+#    if [[ $(($(time_precise) - TIME)) -gt 3300 ]]
+#    then
+#        TIME=$(time_precise)
+#        echo "<${INTERFACE} S 0 0 003 1 ${MOTOR_STATE}>" >&$FILE_DESCRIPTOR
+#
+#    elif [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 01 >" ] || \
+#         [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 03 >" ] || \
+#         [ "$CAN_INPUT" == '' ]
+#    then
+#        EDGE=$(cat /proc/interrupts | grep gpiolib)
+#
+#        if [ "$EDGE" != "$EDGE_OLD" ]
+#        then
+#            echo "User button pressed!"
+#            EDGE_OLD=$EDGE
+#
+#            if [ "$MOTOR_STATE" == '03' ]
+#            then
+#                MOTOR_STATE='01'
+#
+#            else
+#                MOTOR_STATE='03'
+#            fi
+#
+#            echo 'Motor state: '$MOTOR_STATE
+#        fi
+#
+#    elif [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 00 >" ]
+#    then
+#        echo "Power down command received!"
+#        break
+#
+#    else
+#        echo "Ill command received!"
+#        break
+#    fi
+#
+#done
+
 # Main loop.
 while true :
 do
@@ -123,13 +173,7 @@ do
     if [[ $(($(time_precise) - TIME)) -gt 3300 ]]
     then
         TIME=$(time_precise)
-        echo "<${INTERFACE} S 0 0 003 1 ${MOTOR_STATE}>" >&$FILE_DESCRIPTOR
-
-    elif [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 01 >" ] || \
-         [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 03 >" ] || \
-         [ "$CAN_INPUT" == '' ]
-    then
-        EDGE=$(cat /proc/interrupts | grep gpiolib)
+		EDGE=$(cat /proc/interrupts | grep gpiolib)
 
         if [ "$EDGE" != "$EDGE_OLD" ]
         then
@@ -146,6 +190,14 @@ do
 
             echo 'Motor state: '$MOTOR_STATE
         fi
+		
+        echo "<${INTERFACE} S 0 0 003 1 ${MOTOR_STATE}>" >&$FILE_DESCRIPTOR
+
+    elif [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 01 >" ] || \
+         [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 03 >" ] || \
+         [ "$CAN_INPUT" == '' ]
+    then
+        continue
 
     elif [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 00 >" ]
     then
