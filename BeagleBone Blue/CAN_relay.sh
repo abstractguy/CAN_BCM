@@ -108,14 +108,14 @@ do
     if [ "$CAN_INPUT" != '' ]
     then
       echo "$CAN_INPUT"
+    fi
 
-      if [ "$CAN_INPUT" == "< ${INTERFACE} R 0 0 003 1 03 >" ]
-      then
-          echo "<${INTERFACE} U 0 ${DELAY_US} 001 1 03>" >&$FILE_DESCRIPTOR
+    if [ "$CAN_INPUT" == "< ${INTERFACE} R 0 0 003 1 03 >" ]
+    then
+        echo "<${INTERFACE} U 0 ${DELAY_US} 001 1 03>" >&$FILE_DESCRIPTOR
 
-      else
-          echo "<${INTERFACE} U 0 ${DELAY_US} 001 1 01>" >&$FILE_DESCRIPTOR
-      fi
+    else
+        echo "<${INTERFACE} U 0 ${DELAY_US} 001 1 01>" >&$FILE_DESCRIPTOR
     fi
 
     # Read from standard input with 8 second timeout.
