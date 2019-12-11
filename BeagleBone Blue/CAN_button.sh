@@ -69,9 +69,6 @@ sleep 1 # Waiting for server to boot.
 exec {FILE_DESCRIPTOR}<>$SOCKET
 
 function destroy {
-    echo "<${INTERFACE} X 0 0 001 0 00>" >&$FILE_DESCRIPTOR # Delete receiver.
-    sleep 0.5
-
     # Kill server.
     kill $PID_SERVER
 
