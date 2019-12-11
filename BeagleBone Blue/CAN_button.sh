@@ -10,7 +10,7 @@
 # Modifiable variables.
 INTERFACE_TYPE=can
 BITRATE=50000
-DELAY_US=60000
+DELAY_US=100000
 
 # Non-modifiable variables.
 INTERFACE=$INTERFACE_TYPE'0'
@@ -108,7 +108,8 @@ function time_precise {
 
 EDGE_OLD=$(cat /proc/interrupts | grep gpiolib)
 
-sleep 5
+# Leave time to setup other devices.
+sleep 8
 
 TIME=$(time_precise)
 

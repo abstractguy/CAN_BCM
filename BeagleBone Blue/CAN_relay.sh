@@ -10,7 +10,7 @@
 # Modifiable variables.
 INTERFACE_TYPE=can
 BITRATE=50000
-DELAY_US=60000
+DELAY_US=100000
 
 # Non-modifiable variables.
 INTERFACE=$INTERFACE_TYPE'0'
@@ -108,9 +108,11 @@ do
     if [ "$CAN_INPUT" != '' ]
     then
       echo "$CAN_INPUT"
+
       if [ "$CAN_INPUT" == "< ${INTERFACE} R 0 0 003 1 03 >" ]
       then
           echo "<${INTERFACE} U 0 ${DELAY_US} 001 1 03>" >&$FILE_DESCRIPTOR
+
       else
           echo "<${INTERFACE} U 0 ${DELAY_US} 001 1 01>" >&$FILE_DESCRIPTOR
       fi
@@ -123,17 +125,21 @@ do
     then
         echo "SYNC timeout!"
         break
+
     elif [ "$SYNC" == 'ON' ]
     then
         continue
+
     elif [ "$SYNC" == 'OFF' ]
     then
         echo 'Power down command received!'
         break
+
     else
         echo 'Ill command received from computer.'
         break
     fi
+
 done
 
 destroy
