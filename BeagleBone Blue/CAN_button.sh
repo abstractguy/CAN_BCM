@@ -103,6 +103,8 @@ EDGE_OLD=$(cat /proc/interrupts | grep gpiolib)
 # Leave time to setup other devices.
 sleep 8
 
+echo "<${INTERFACE} S 0 0 003 1 01>" >&$FILE_DESCRIPTOR
+
 # Main loop.
 while true :
 do
@@ -118,7 +120,7 @@ do
        [ "$CAN_INPUT" == "< ${INTERFACE} 001 1 03 >" ] || \
        [ "$CAN_INPUT" == '' ]
     then
-        sleep 0.05
+        sleep 0.04
 
         EDGE=$(cat /proc/interrupts | grep gpiolib)
 
