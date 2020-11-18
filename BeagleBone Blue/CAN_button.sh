@@ -60,6 +60,9 @@ fi
 # Making sure the interface is up.
 eval "ip link set up $INTERFACE type $INTERFACE_TYPE $BITRATE"
 
+# Increase sending buffer size.
+ifconfig $INTERFACE txqueuelen 1000
+
 # Starting CAN broadcast manager.
 bcmserver &
 PID_SERVER=$!
